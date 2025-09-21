@@ -47,7 +47,7 @@ const VideoDetailPage = () => {
         api.getAllVideos({ limit: 10 }),
       ]);
 
-      const populatedComments = (commentsRes?.docs || []).map((c) => ({
+      const populatedComments = (commentsRes?.data?.docs || []).map((c) => ({
         ...c,
         owner:
           c.owner && typeof c.owner === "object"
@@ -55,10 +55,10 @@ const VideoDetailPage = () => {
             : { username: "Unknown", avatar: "" },
       }));
 
-      setVideo(videoRes || null);
+      setVideo(videoRes?.data || null);
       setComments(populatedComments);
       setRecommendedVideos(
-        allVideosRes?.videos?.filter((v) => v._id !== id) || []
+        allVideosRes?.data?.videos?.filter((v) => v._id !== id) || []
       );
     } catch (err) {
       setError("Failed to load video details.");
