@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { registerUser } from "./lib/api";
+import { useUser } from "./components/UserContext";
 import toast from "react-hot-toast";
 
 const RegisterPage = () => {
@@ -14,6 +15,7 @@ const RegisterPage = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { handleLoginSuccess } = useUser();
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -49,6 +51,35 @@ const RegisterPage = () => {
     }
   };
 
+  const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+  console.log(BACKEND_URL);
+
+  const handleOAuthLogin = (provider) => {
+    const oauthUrl = `${BACKEND_URL}/auth/${provider}`;
+    const width = 600;
+    const height = 700;
+    const left = window.screen.width / 2 - width / 2;
+    const top = window.screen.height / 2 - height / 2;
+
+    const authWindow = window.open(
+      oauthUrl,
+      "_blank",
+      `width=${width},height=${height},top=${top},left=${left}`
+    );
+
+    window.addEventListener("message", function handler(event) {
+      if (event.origin !== BACKEND_URL) return;
+      const { token, user } = event.data || {};
+      if (token && user) {
+        handleLoginSuccess(user);
+        toast.success("Logged in via " + provider + "!");
+        navigate("/");
+        authWindow.close();
+        window.removeEventListener("message", handler);
+      }
+    });
+  };
+
   return (
     <div className="flex justify-center items-center min-h-[calc(100vh-3.5rem)] bg-[#0f0f0f]">
       <div className="w-full max-w-md p-8 space-y-6 bg-[#121212] rounded-lg shadow-md">
@@ -56,7 +87,9 @@ const RegisterPage = () => {
           Create an Account
         </h1>
         {error && <p className="text-red-500 text-center text-sm">{error}</p>}
+
         <form className="space-y-6" onSubmit={handleSubmit}>
+          {/* Full Name */}
           <div>
             <label
               htmlFor="fullName"
@@ -74,6 +107,8 @@ const RegisterPage = () => {
               required
             />
           </div>
+
+          {/* Username */}
           <div>
             <label
               htmlFor="username"
@@ -91,6 +126,8 @@ const RegisterPage = () => {
               required
             />
           </div>
+
+          {/* Email */}
           <div>
             <label
               htmlFor="email"
@@ -108,6 +145,8 @@ const RegisterPage = () => {
               required
             />
           </div>
+
+          {/* Password */}
           <div>
             <label
               htmlFor="password"
@@ -125,6 +164,8 @@ const RegisterPage = () => {
               required
             />
           </div>
+
+          {/* Avatar */}
           <div>
             <label
               htmlFor="avatar"
@@ -139,9 +180,9 @@ const RegisterPage = () => {
               accept="image/*"
               className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
               onChange={handleChange}
-              required
             />
           </div>
+
           <button
             type="submit"
             className="w-full px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-500"
@@ -150,6 +191,23 @@ const RegisterPage = () => {
             {loading ? "Registering..." : "Register"}
           </button>
         </form>
+
+        {/* OAuth Buttons */}
+        <div className="flex flex-col gap-3 mt-4">
+          <button
+            onClick={() => handleOAuthLogin("google")}
+            className="w-full px-4 py-2 text-white bg-red-600 rounded-md hover:bg-red-700"
+          >
+            Continue with Google
+          </button>
+          <button
+            onClick={() => handleOAuthLogin("github")}
+            className="w-full px-4 py-2 text-white bg-gray-800 rounded-md hover:bg-gray-900"
+          >
+            Continue with GitHub
+          </button>
+        </div>
+
         <p className="text-sm text-center text-gray-400">
           Already have an account?{" "}
           <Link

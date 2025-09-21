@@ -32,11 +32,42 @@ const LoginPage = () => {
     }
   };
 
+  // Open OAuth popup
+  const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+
+  const handleOAuthLogin = (provider) => {
+    // OAuth routes are typically at the root, not under /api/v1
+    const oauthUrl = `${BACKEND_URL}/auth/${provider}`;
+    const width = 600;
+    const height = 700;
+    const left = window.screen.width / 2 - width / 2;
+    const top = window.screen.height / 2 - height / 2;
+
+    const authWindow = window.open(
+      oauthUrl,
+      "_blank",
+      `width=${width},height=${height},top=${top},left=${left}`
+    );
+
+    window.addEventListener("message", function handler(event) {
+      if (event.origin !== BACKEND_URL) return; // Ensure correct origin
+      const { token, user } = event.data || {};
+      if (token && user) {
+        handleLoginSuccess(user);
+        toast.success("Logged in via " + provider + "!");
+        navigate("/");
+        authWindow.close();
+        window.removeEventListener("message", handler);
+      }
+    });
+  };
+
   return (
     <div className="flex justify-center items-center min-h-[calc(100vh-3.5rem)] bg-[#0f0f0f]">
       <div className="w-full max-w-md p-8 space-y-6 bg-[#121212] rounded-lg shadow-md">
         <h1 className="text-2xl font-bold text-center text-white">Login</h1>
         {error && <p className="text-red-500 text-center text-sm">{error}</p>}
+
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div>
             <label
@@ -55,6 +86,7 @@ const LoginPage = () => {
               required
             />
           </div>
+
           <div>
             <label
               htmlFor="password"
@@ -72,6 +104,7 @@ const LoginPage = () => {
               required
             />
           </div>
+
           <button
             type="submit"
             className="w-full px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-500"
@@ -80,6 +113,22 @@ const LoginPage = () => {
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
+
+        <div className="flex flex-col gap-3 mt-4">
+          <button
+            onClick={() => handleOAuthLogin("google")}
+            className="w-full px-4 py-2 text-white bg-red-600 rounded-md hover:bg-red-700"
+          >
+            Login with Google
+          </button>
+          <button
+            onClick={() => handleOAuthLogin("github")}
+            className="w-full px-4 py-2 text-white bg-gray-800 rounded-md hover:bg-gray-900"
+          >
+            Login with GitHub
+          </button>
+        </div>
+
         <p className="text-sm text-center text-gray-400">
           Don't have an account?{" "}
           <Link
