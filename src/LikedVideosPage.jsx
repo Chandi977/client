@@ -1,0 +1,61 @@
+import { useState, useEffect } from "react";
+import { getLikedVideos } from "./lib/api";
+import VideoCard from "./components/VideoCard";
+import { useUser } from "./components/UserContext";
+
+const LikedVideosPage = () => {
+  const [videos, setVideos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const { loading: userLoading, isLoggedIn } = useUser();
+
+  useEffect(() => {
+    if (userLoading) return;
+    if (!isLoggedIn) return;
+    const fetchLikedVideos = async () => {
+      try {
+        setLoading(true);
+        const response = await getLikedVideos();
+        // The API returns like documents, we need to extract the video object
+        setVideos(response.data.map((like) => like.video) || []);
+      } catch (err) {
+        setError(
+          "Failed to fetch liked videos. Please make sure you are logged in."
+        );
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchLikedVideos();
+  }, [userLoading, isLoggedIn]);
+
+  if (loading)
+    return <div className="p-6 text-center">Loading Liked Videos...</div>;
+  if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
+
+  return (
+    <div className="p-6 bg-[#0f0f0f] min-h-[calc(100vh-3.5rem)]">
+      <h1 className="text-2xl font-bold mb-6">Liked Videos</h1>
+      <div className="flex flex-col gap-4">
+        {videos.length > 0 ? (
+          videos.map(
+            (video) =>
+              video && (
+                <VideoCard
+                  key={video._id}
+                  videoId={video._id}
+                  {...video}
+                  variant="horizontal"
+                />
+              )
+          )
+        ) : (
+          <p>You haven't liked any videos yet.</p>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default LikedVideosPage;
