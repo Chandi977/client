@@ -3,18 +3,17 @@ import { useEffect } from "react";
 const OAuthSuccessPage = () => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const userStr = params.get("user");
+    const dataStr = params.get("data"); // Expect a 'data' param with user and token
 
-    if (window.opener && userStr) {
+    if (window.opener && dataStr) {
       try {
-        const user = JSON.parse(decodeURIComponent(userStr));
-        // The backend has already set the httpOnly cookie.
-        // We send the user object to the main window to update the UI immediately.
-        window.opener.postMessage({ user }, window.location.origin);
+        const data = JSON.parse(decodeURIComponent(dataStr));
+        // Send the entire data object (user + token) to the main window
+        window.opener.postMessage({ data }, window.location.origin);
       } catch (error) {
         // Handle potential JSON parsing errors
         window.opener.postMessage(
-          { error: "Failed to parse user data." },
+          { error: "Failed to parse authentication data." },
           window.location.origin
         );
       } finally {
@@ -22,9 +21,9 @@ const OAuthSuccessPage = () => {
         window.close();
       }
     } else if (window.opener) {
-      // Handle case where user data is not in the URL
+      // Handle case where data is not in the URL
       window.opener.postMessage(
-        { error: "Authentication failed. No user data received." },
+        { error: "Authentication failed. No data received." },
         window.location.origin
       );
       window.close();

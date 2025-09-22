@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import { Link } from "react-router-dom";
 import { createTweet, getUserTweets, deleteTweet } from "../lib/api";
 import { useUser } from "./UserContext";
 import { ThumbsUp, Trash2 } from "lucide-react";
@@ -59,7 +60,18 @@ const CommunityTab = ({ channel }) => {
   const isOwner = isLoggedIn && user?._id === channel?._id;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-white">
+      {!isLoggedIn && (
+        <div className="bg-[#121212] p-4 rounded-lg text-center">
+          <p className="mb-4">
+            <Link to="/login" className="text-blue-500 hover:underline">
+              Log in
+            </Link>{" "}
+            to create a post and interact with the community.
+          </p>
+        </div>
+      )}
+
       {isOwner && (
         <div className="bg-[#121212] p-4 rounded-lg">
           <textarea
@@ -79,7 +91,13 @@ const CommunityTab = ({ channel }) => {
           </div>
         </div>
       )}
-      {loading && <p>Loading posts...</p>}
+
+      {loading && <p className="text-center">Loading posts...</p>}
+
+      {!loading && tweets.length === 0 && (
+        <p className="text-center text-gray-400">No posts yet.</p>
+      )}
+
       {tweets.map((tweet) => (
         <div key={tweet._id} className="bg-[#121212] p-4 rounded-lg flex gap-4">
           <img

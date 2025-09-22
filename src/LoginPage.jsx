@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { loginUser } from "./lib/api";
 import { useUser } from "./components/UserContext";
 import toast from "react-hot-toast";
+import Cookies from "js-cookie"; // Import js-cookie
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -42,10 +43,12 @@ const LoginPage = () => {
         return;
       }
 
-      const { user, error } = event.data;
+      const { data, error } = event.data;
 
-      if (user) {
-        handleLoginSuccess(user);
+      if (data && data.user && data.token) {
+        handleLoginSuccess(data.user);
+        // Store the token in a cookie
+        Cookies.set("authToken", data.token, { expires: 7 }); // Expires in 7 days
         toast.success("Logged in successfully!");
         navigate("/");
       } else if (error) {
@@ -131,13 +134,13 @@ const LoginPage = () => {
             onClick={() => handleOAuthLogin("google")}
             className="w-full px-4 py-2 text-white bg-red-600 rounded-md hover:bg-red-700"
           >
-            Login with Google
+            Continue with Google
           </button>
           <button
             onClick={() => handleOAuthLogin("github")}
             className="w-full px-4 py-2 text-white bg-gray-800 rounded-md hover:bg-gray-900"
           >
-            Login with GitHub
+            Continue with GitHub
           </button>
         </div>
 
