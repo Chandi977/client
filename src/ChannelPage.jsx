@@ -7,6 +7,7 @@ import {
   toggleSubscription,
 } from "./lib/api";
 import { useUser } from "./components/UserContext";
+import { secureUrl } from "./lib/utils";
 import VideoCard from "./components/VideoCard";
 import CommunityTab from "./components/CommunityTab";
 
@@ -93,7 +94,7 @@ const ChannelPage = () => {
       <div className="w-full h-48 bg-gray-800">
         {channel.coverImage && (
           <img
-            src={channel.coverImage}
+            src={secureUrl(channel.coverImage)}
             alt={`${channel.username}'s cover`}
             className="w-full h-full object-cover"
           />
@@ -103,7 +104,7 @@ const ChannelPage = () => {
       {/* Channel Header */}
       <div className="px-6 py-4 flex items-center gap-6 border-b border-gray-800">
         <img
-          src={channel.avatar}
+          src={secureUrl(channel.avatar)}
           alt={channel.username}
           className="w-20 h-20 rounded-full"
         />

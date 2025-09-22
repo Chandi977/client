@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { format as formatTimeAgo } from "timeago.js";
 import { toggleCommentLike } from "../lib/api";
 import toast from "react-hot-toast";
+import { secureUrl } from "../lib/utils";
 import { useUser } from "./UserContext";
 
 const Comment = ({
@@ -68,8 +69,9 @@ const Comment = ({
   return (
     <div className="flex items-start gap-4 text-white">
       <img
-        src={avatar}
+        src={secureUrl(avatar)}
         alt={author}
+        loading="lazy"
         className="w-10 h-10 rounded-full object-cover"
       />
       <div className="flex-grow min-w-0">

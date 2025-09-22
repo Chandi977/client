@@ -1,13 +1,18 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, lazy, Suspense } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { ThumbsUp, Share2, Download, ListPlus } from "lucide-react";
 import toast from "react-hot-toast";
 import VideoCard from "./components/VideoCard";
-import Comments from "./components/Comments";
-import AddToPlaylistModal from "./components/AddToPlaylistModal";
 import * as api from "./lib/api";
 import { useUser } from "./components/UserContext";
+import { secureUrl } from "./lib/utils";
 import VideoPlayer from "./components/VideoPlayer";
+
+// Lazy load components that are not critical for the initial render
+const Comments = lazy(() => import("./components/Comments"));
+const AddToPlaylistModal = lazy(() =>
+  import("./components/AddToPlaylistModal")
+);
 
 const VideoDetailPage = () => {
   const { id } = useParams();
@@ -169,8 +174,8 @@ const VideoDetailPage = () => {
       <div className="w-full lg:flex-1 min-w-0">
         <div className="aspect-video bg-black rounded-xl mb-4 overflow-hidden">
           <VideoPlayer
-            src={video.videoFile?.url || video.videoFile}
-            poster={video.thumbnail?.url}
+            src={secureUrl(video.videoFile?.url || video.videoFile)}
+            poster={secureUrl(video.thumbnail?.url)}
             onPlay={handleRecordView}
             onNext={handleNextVideo}
             onPrevious={handlePreviousVideo}
@@ -185,7 +190,7 @@ const VideoDetailPage = () => {
               className="flex items-center gap-3"
             >
               <img
-                src={video.owner?.avatar || null}
+                src={secureUrl(video.owner?.avatar)}
                 alt={video.owner?.username}
                 className="w-10 h-10 rounded-full"
               />
@@ -242,7 +247,11 @@ const VideoDetailPage = () => {
           <p className="mt-2">{video.description}</p>
         </div>
 
-        <Comments videoId={id} videoOwnerId={video.owner?._id} />
+        <Suspense
+          fallback={<div className="text-center p-4">Loading comments...</div>}
+        >
+          <Comments videoId={id} videoOwnerId={video.owner?._id} />
+        </Suspense>
       </div>
 
       <div className="w-full lg:w-96 lg:flex-shrink-0">
@@ -264,10 +273,12 @@ const VideoDetailPage = () => {
         </div>
       </div>
       {isPlaylistModalOpen && (
-        <AddToPlaylistModal
-          videoId={id}
-          onClose={() => setIsPlaylistModalOpen(false)}
-        />
+        <Suspense fallback={<div />}>
+          <AddToPlaylistModal
+            videoId={id}
+            onClose={() => setIsPlaylistModalOpen(false)}
+          />
+        </Suspense>
       )}
     </div>
   );

@@ -1,24 +1,31 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense, lazy } from "react";
 import { Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import AOS from "aos";
 
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
-import VideoGrid from "./components/VideoGrid";
-import LoginPage from "./LoginPage";
-import RegisterPage from "./RegisterPage";
-import VideoDetailPage from "./VideoDetailPage";
-import LikedVideosPage from "./LikedVideosPage";
-import HistoryPage from "./HistoryPage";
-import SearchResultsPage from "./SearchResultsPage";
-import ChannelPage from "./ChannelPage";
-import DashboardPage from "./DashboardPage";
-import LibraryPage from "./LibraryPage";
-import PlaylistDetailPage from "./PlaylistDetailPage";
-import SubscriptionsPage from "./SubscriptionsPage";
-import TrendingPage from "./TrendingPage";
-import OAuthSuccessPage from "./OAuthSuccessPage";
+
+// Lazy load page components for better performance
+const VideoGrid = lazy(() => import("./components/VideoGrid"));
+const LoginPage = lazy(() => import("./LoginPage"));
+const RegisterPage = lazy(() => import("./RegisterPage"));
+const VideoDetailPage = lazy(() => import("./VideoDetailPage"));
+const LikedVideosPage = lazy(() => import("./LikedVideosPage"));
+const HistoryPage = lazy(() => import("./HistoryPage"));
+const SearchResultsPage = lazy(() => import("./SearchResultsPage"));
+const ChannelPage = lazy(() => import("./ChannelPage"));
+const DashboardPage = lazy(() => import("./DashboardPage"));
+const LibraryPage = lazy(() => import("./LibraryPage"));
+const PlaylistDetailPage = lazy(() => import("./PlaylistDetailPage"));
+const SubscriptionsPage = lazy(() => import("./SubscriptionsPage"));
+const TrendingPage = lazy(() => import("./TrendingPage"));
+const OAuthSuccessPage = lazy(() => import("./OAuthSuccessPage"));
+const UploadPage = lazy(() => import("./UploadPage"));
+
+const SuspenseFallback = () => (
+  <div className="flex-1 p-6 text-center">Loading page...</div>
+);
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(
@@ -60,25 +67,28 @@ function App() {
             ></div>
           )}
           <main className="flex-1 overflow-y-auto z-10">
-            <Routes>
-              <Route path="/" element={<VideoGrid />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="/oauth-success" element={<OAuthSuccessPage />} />
-              <Route path="/video/:id" element={<VideoDetailPage />} />
-              <Route path="/liked-videos" element={<LikedVideosPage />} />
-              <Route path="/history" element={<HistoryPage />} />
-              <Route path="/results" element={<SearchResultsPage />} />
-              <Route path="/channel/:username" element={<ChannelPage />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/library" element={<LibraryPage />} />
-              <Route
-                path="/playlist/:playlistId"
-                element={<PlaylistDetailPage />}
-              />
-              <Route path="/subscriptions" element={<SubscriptionsPage />} />
-              <Route path="/trending" element={<TrendingPage />} />
-            </Routes>
+            <Suspense fallback={<SuspenseFallback />}>
+              <Routes>
+                <Route path="/" element={<VideoGrid />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/oauth-success" element={<OAuthSuccessPage />} />
+                <Route path="/upload" element={<UploadPage />} />
+                <Route path="/video/:id" element={<VideoDetailPage />} />
+                <Route path="/liked-videos" element={<LikedVideosPage />} />
+                <Route path="/history" element={<HistoryPage />} />
+                <Route path="/results" element={<SearchResultsPage />} />
+                <Route path="/channel/:username" element={<ChannelPage />} />
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/library" element={<LibraryPage />} />
+                <Route
+                  path="/playlist/:playlistId"
+                  element={<PlaylistDetailPage />}
+                />
+                <Route path="/subscriptions" element={<SubscriptionsPage />} />
+                <Route path="/trending" element={<TrendingPage />} />
+              </Routes>
+            </Suspense>
           </main>
         </div>
       </div>

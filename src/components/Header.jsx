@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useUser } from "./UserContext";
+import { secureUrl } from "../lib/utils";
 
 const Header = ({ onMenuClick }) => {
   const navigate = useNavigate();
@@ -84,7 +85,7 @@ const Header = ({ onMenuClick }) => {
           <div className="relative">
             <button onClick={() => setIsMenuOpen(!isMenuOpen)}>
               <img
-                src={user.avatar}
+                src={secureUrl(user.avatar)}
                 alt={user.username}
                 className="w-8 h-8 rounded-full cursor-pointer"
               />
