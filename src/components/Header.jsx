@@ -16,8 +16,7 @@ import {
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useUser } from "./UserContext";
-
-const Header = ({ onMenuClick }) => {
+const Header = ({ onMenuClick, isSidebarOpen }) => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -51,7 +50,7 @@ const Header = ({ onMenuClick }) => {
   };
 
   return (
-    <header className="flex justify-between items-center px-4 h-14 bg-[#0f0f0f] border-b border-gray-800 sticky top-0 z-50">
+    <header className="flex justify-between items-center px-4 h-14 bg-[#0f0f0f]/80 backdrop-blur-lg border-b border-gray-800 sticky top-0 z-50">
       {/* Left Section */}
       <div className="flex items-center gap-4">
         <button

@@ -19,7 +19,7 @@ const CommunityTab = ({ channel }) => {
     const fetchTweets = async () => {
       try {
         const response = await getUserTweets(channel._id);
-        setTweets(response.data || []);
+        setTweets(response.data.data || []);
       } catch (error) {
         console.error("Failed to fetch tweets", error);
       } finally {
@@ -35,7 +35,7 @@ const CommunityTab = ({ channel }) => {
       const response = await createTweet({ content: newTweet });
       // Manually construct the new tweet object with owner info for immediate UI update
       const newTweetData = {
-        ...response.data,
+        ...response.data.data,
         owner: { ...channel },
         likesCount: 0,
       };
@@ -99,7 +99,11 @@ const CommunityTab = ({ channel }) => {
       )}
 
       {tweets.map((tweet) => (
-        <div key={tweet._id} className="bg-[#121212] p-4 rounded-lg flex gap-4">
+        <div
+          key={tweet._id}
+          className="bg-[#121212] p-4 rounded-lg flex gap-4"
+          data-aos="fade-up"
+        >
           <img
             src={channel.avatar}
             alt={channel.username}

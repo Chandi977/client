@@ -1,75 +1,86 @@
-import { useState } from "react";
-import { Routes, Route, Outlet } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
+import AOS from "aos";
+
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
 import VideoGrid from "./components/VideoGrid";
-import VideoDetailPage from "./VideoDetailPage";
 import LoginPage from "./LoginPage";
 import RegisterPage from "./RegisterPage";
-import UploadPage from "./UploadPage";
-import DashboardPage from "./DashboardPage";
-import SearchResultsPage from "./SearchResultsPage";
-import HistoryPage from "./HistoryPage";
+import VideoDetailPage from "./VideoDetailPage";
 import LikedVideosPage from "./LikedVideosPage";
+import HistoryPage from "./HistoryPage";
+import SearchResultsPage from "./SearchResultsPage";
 import ChannelPage from "./ChannelPage";
-import SubscriptionsPage from "./SubscriptionsPage";
-import TrendingPage from "./TrendingPage";
+import DashboardPage from "./DashboardPage";
 import LibraryPage from "./LibraryPage";
 import PlaylistDetailPage from "./PlaylistDetailPage";
-import MainLayout from "./components/MainLayout";
-import ProtectedRoute from "./components/ProtectedRoute";
+import SubscriptionsPage from "./SubscriptionsPage";
+import TrendingPage from "./TrendingPage";
 
 function App() {
-  const [isSidebarVisible, setIsSidebarVisible] = useState(true);
-
-  const toggleSidebar = () => setIsSidebarVisible(!isSidebarVisible);
-
-  // A layout component that includes the sidebar
-  const AppLayout = () => (
-    <MainLayout isSidebarVisible={isSidebarVisible}>
-      <Outlet />
-    </MainLayout>
+  const [isSidebarOpen, setIsSidebarOpen] = useState(
+    () => window.innerWidth >= 1024
   );
 
-  return (
-    <div className="min-h-screen bg-[#0f0f0f] text-white">
-      <Toaster
-        position="top-right"
-        reverseOrder={false}
-        toastOptions={{
-          style: { background: "#282828", color: "#fff" },
-        }}
-      />
-      <Header onMenuClick={toggleSidebar} />
-      <Routes>
-        {/* Routes with sidebar */}
-        <Route element={<AppLayout />}>
-          <Route path="/" element={<VideoGrid />} />
-          <Route path="/video/:id" element={<VideoDetailPage />} />
-          <Route path="/results" element={<SearchResultsPage />} />
-          <Route path="/channel/:username" element={<ChannelPage />} />
-          <Route path="/trending" element={<TrendingPage />} />
+  useEffect(() => {
+    AOS.init({
+      duration: 800,
+      once: true, // Animate elements only once
+    });
+  }, []);
 
-          {/* Protected Routes */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="/history" element={<HistoryPage />} />
-            <Route path="/liked-videos" element={<LikedVideosPage />} />
-            <Route path="/subscriptions" element={<SubscriptionsPage />} />
-            <Route path="/library" element={<LibraryPage />} />
-            <Route
-              path="/playlist/:playlistId"
-              element={<PlaylistDetailPage />}
-            />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/upload" element={<UploadPage />} />
-          </Route>
-        </Route>
-        {/* Routes without sidebar */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-      </Routes>
-    </div>
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1024) {
+        setIsSidebarOpen(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen((prev) => !prev);
+  };
+
+  return (
+    <>
+      <Toaster position="top-right" reverseOrder={false} />
+      <div className="flex flex-col h-screen bg-[#0f0f0f] text-white">
+        <Header onMenuClick={toggleSidebar} isSidebarOpen={isSidebarOpen} />
+        <div className="flex flex-1 overflow-hidden relative">
+          <Sidebar isOpen={isSidebarOpen} />
+          {isSidebarOpen && (
+            <div
+              className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+              onClick={toggleSidebar}
+            ></div>
+          )}
+          <main className="flex-1 overflow-y-auto z-10">
+            <Routes>
+              <Route path="/" element={<VideoGrid />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/video/:id" element={<VideoDetailPage />} />
+              <Route path="/liked-videos" element={<LikedVideosPage />} />
+              <Route path="/history" element={<HistoryPage />} />
+              <Route path="/results" element={<SearchResultsPage />} />
+              <Route path="/channel/:username" element={<ChannelPage />} />
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/library" element={<LibraryPage />} />
+              <Route
+                path="/playlist/:playlistId"
+                element={<PlaylistDetailPage />}
+              />
+              <Route path="/subscriptions" element={<SubscriptionsPage />} />
+              <Route path="/trending" element={<TrendingPage />} />
+            </Routes>
+          </main>
+        </div>
+      </div>
+    </>
   );
 }
 

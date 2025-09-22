@@ -24,7 +24,7 @@ const SearchResultsPage = () => {
       setError(null);
       try {
         const response = await searchVideos(query);
-        setVideos(response.data || []);
+        setVideos(response.data.data || []);
       } catch (err) {
         setError("Failed to fetch search results.");
         console.error(err);

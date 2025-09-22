@@ -16,8 +16,8 @@ const LikedVideosPage = () => {
       try {
         setLoading(true);
         const response = await getLikedVideos();
-        // The API returns like documents, we need to extract the video object
-        setVideos(response.data.map((like) => like.video) || []);
+        // The API returns an array of liked video documents
+        setVideos(response.data.data || []);
       } catch (err) {
         setError(
           "Failed to fetch liked videos. Please make sure you are logged in."

@@ -22,7 +22,7 @@ const CreatePlaylistForm = ({ onPlaylistCreated }) => {
         isPrivate,
       });
       toast.success("Playlist created!");
-      onPlaylistCreated(newPlaylist.data);
+      onPlaylistCreated(newPlaylist.data.data);
       setName("");
       setDescription("");
     } catch (err) {

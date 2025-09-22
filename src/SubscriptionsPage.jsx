@@ -21,7 +21,7 @@ const SubscriptionsPage = () => {
         setLoading(true);
         const response = await getSubscribedChannels(user._id);
         // The API returns subscription documents, we need the 'channel' part
-        setChannels(response.data.map((sub) => sub.channel) || []);
+        setChannels(response.data.data.map((sub) => sub.channel) || []);
       } catch (err) {
         setError("Failed to fetch subscriptions.");
         console.error(err);

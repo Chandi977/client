@@ -21,7 +21,7 @@ const AddToPlaylistModal = ({ videoId, onClose }) => {
       try {
         const response = await getUserPlaylists(user._id);
         // Mark which playlists already contain this video
-        const playlistsWithVideoStatus = response.data.map((p) => ({
+        const playlistsWithVideoStatus = response.data.data.map((p) => ({
           ...p,
           hasVideo: p.videos.some((v) => v._id === videoId),
         }));
@@ -60,7 +60,7 @@ const AddToPlaylistModal = ({ videoId, onClose }) => {
     if (!newPlaylistName.trim()) return;
     try {
       const response = await createPlaylist({ name: newPlaylistName });
-      const newPlaylist = { ...response.data, hasVideo: false };
+      const newPlaylist = { ...response.data.data, hasVideo: false };
       setPlaylists((prev) => [newPlaylist, ...prev]);
       setNewPlaylistName("");
       toast.success("Playlist created!");
@@ -71,7 +71,7 @@ const AddToPlaylistModal = ({ videoId, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-      <div className="bg-[#121212] rounded-lg w-full max-w-sm p-4">
+      <div className="bg-black/50 backdrop-blur-lg border border-gray-700 rounded-lg w-full max-w-sm p-4">
         <div className="flex justify-between items-center mb-4">
           <h2 className="font-bold text-lg">Save to...</h2>
           <button onClick={onClose}>

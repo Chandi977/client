@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { format as formatTimeAgo } from "timeago.js";
 
 const VideoCard = ({
   videoId,
@@ -16,6 +17,7 @@ const VideoCard = ({
   const avatarUrl = owner?.avatar || channelAvatar;
   const thumbnailUrl =
     typeof thumbnail === "string" ? thumbnail : thumbnail?.url;
+  const timeAgo = timestamp ? formatTimeAgo(timestamp) : "";
 
   if (variant === "horizontal") {
     return (
@@ -34,7 +36,7 @@ const VideoCard = ({
             </h3>
             <p className="text-gray-400 text-xs mt-1">{channelName}</p>
             <p className="text-gray-400 text-xs">
-              {views} &bull; {timestamp}
+              {views || 0} views &bull; {timeAgo}
             </p>
           </div>
         </div>
@@ -66,7 +68,7 @@ const VideoCard = ({
             </h3>
             <p className="text-gray-400 text-sm mt-1">{channelName}</p>
             <p className="text-gray-400 text-sm">
-              {views} &bull; {timestamp}
+              {views || 0} views &bull; {timeAgo}
             </p>
           </div>
         </div>

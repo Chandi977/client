@@ -1,34 +1,69 @@
-import { Home, Flame, Clapperboard, Library } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import {
+  Home,
+  History,
+  Video,
+  ThumbsUp,
+  ListVideo,
+  Users,
+  TrendingUp,
+} from "lucide-react";
+import { Link } from "react-router-dom";
+import { useUser } from "./UserContext";
 
-const Sidebar = () => {
-  const location = useLocation();
-  const menuItems = [
-    { icon: <Home />, name: "Home", path: "/" },
-    { icon: <Flame />, name: "Trending", path: "/trending" },
-    { icon: <Clapperboard />, name: "Subscriptions", path: "/subscriptions" },
-    { icon: <Library />, name: "Library", path: "/library" },
+const Sidebar = ({ isOpen }) => {
+  const { isLoggedIn } = useUser();
+
+  const mainLinks = [
+    { icon: <Home />, text: "Home", to: "/" },
+    { icon: <TrendingUp />, text: "Trending", to: "/trending" },
+    { icon: <Users />, text: "Subscriptions", to: "/subscriptions" },
+  ];
+
+  const libraryLinks = [
+    { icon: <History />, text: "History", to: "/history" },
+    { icon: <Video />, text: "Your Videos", to: "/dashboard" }, // Assuming dashboard shows user's videos
+    { icon: <ThumbsUp />, text: "Liked Videos", to: "/liked-videos" },
+    { icon: <ListVideo />, text: "Library", to: "/library" },
   ];
 
   return (
-    <aside className="w-60 bg-[#0f0f0f] p-2 pt-4 hidden md:block">
-      <nav>
-        <ul>
-          {menuItems.map((item) => (
-            <li key={item.name}>
-              <Link
-                to={item.path}
-                className={`flex items-center gap-5 px-3 py-2 rounded-lg hover:bg-gray-800 ${
-                  location.pathname === item.path ? "bg-gray-800" : ""
-                }`}
-              >
-                {item.icon}
-                <span className="font-medium">{item.name}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+    <aside
+      className={`fixed top-0 left-0 z-40 w-60 h-screen bg-[#0f0f0f]/80 backdrop-blur-lg text-white p-4 transition-transform duration-300 ease-in-out 
+      lg:sticky lg:top-14 lg:h-[calc(100vh-3.5rem)] lg:translate-x-0
+      ${
+        isOpen ? "translate-x-0" : "-translate-x-full"
+      } overflow-y-auto pt-20 lg:pt-4`}
+    >
+      <nav className="space-y-2">
+        {mainLinks.map((link) => (
+          <Link
+            key={link.to}
+            to={link.to}
+            className="flex items-center gap-4 p-2 rounded-lg hover:bg-gray-800"
+          >
+            {link.icon}
+            <span className="font-medium">{link.text}</span>
+          </Link>
+        ))}
       </nav>
+      {isLoggedIn && (
+        <>
+          <hr className="my-4 border-gray-700" />
+          <nav className="space-y-2">
+            <h2 className="px-2 text-lg font-semibold">You</h2>
+            {libraryLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className="flex items-center gap-4 p-2 rounded-lg hover:bg-gray-800"
+              >
+                {link.icon}
+                <span className="font-medium">{link.text}</span>
+              </Link>
+            ))}
+          </nav>
+        </>
+      )}
     </aside>
   );
 };

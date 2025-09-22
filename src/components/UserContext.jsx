@@ -27,7 +27,7 @@ export const UserProvider = ({ children }) => {
 
       try {
         const response = await api.getCurrentUser(); // Assumes this calls /api/v1/users/me
-        setUser(response.data);
+        setUser(response.data.data);
         setIsLoggedIn(true);
       } catch (error) {
         console.error("Session expired or invalid:", error);

@@ -17,7 +17,7 @@ const HistoryPage = () => {
         setLoading(true);
         const response = await getWatchHistory();
         // The API seems to return history items which contain the video object
-        setVideos(response.data.map((item) => item.video) || []);
+        setVideos(response.data.data.map((item) => item.video) || []);
       } catch (err) {
         setError(
           "Failed to fetch watch history. Please make sure you are logged in."

@@ -27,15 +27,15 @@ const ChannelPage = () => {
       setError(null);
       try {
         const profileRes = await getUserChannelProfile(username);
-        if (!profileRes.success || !profileRes.data) {
+        if (!profileRes.data.success || !profileRes.data.data) {
           throw new Error("Channel not found.");
         }
-        setChannel(profileRes.data);
+        setChannel(profileRes.data.data);
 
         // Fetch videos for this channel's user ID
-        const videosRes = await getUserVideos(profileRes.data._id);
+        const videosRes = await getUserVideos(profileRes.data.data._id);
         // The API might return an object with a `videos` property
-        setVideos(videosRes.data?.videos || videosRes.data || []);
+        setVideos(videosRes.data?.data?.videos || videosRes.data?.data || []);
       } catch (err) {
         console.error("Failed to fetch channel data:", err);
         setError(err.message || "Could not load channel.");

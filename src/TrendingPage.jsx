@@ -15,7 +15,7 @@ const TrendingPage = () => {
       try {
         setLoading(true);
         const response = await getTrendingVideos();
-        setVideos(response.data || []);
+        setVideos(response.data.data || []);
       } catch (err) {
         setError("Failed to fetch trending videos.");
         console.error(err);

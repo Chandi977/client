@@ -25,9 +25,9 @@ const DashboardPage = () => {
           getChannelStats(user._id),
           getChannelVideos(user._id),
         ]);
-        setStats(statsRes.data);
+        setStats(statsRes.data.data);
         // Handle cases where API returns an object with a 'videos' property or a direct array.
-        setVideos(videosRes.data?.videos || videosRes.data || []);
+        setVideos(videosRes.data?.data?.videos || videosRes.data?.data || []);
       } catch (err) {
         setError("Failed to load dashboard data. Please try again.");
         console.error(err);
@@ -43,7 +43,10 @@ const DashboardPage = () => {
   if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
 
   const StatCard = ({ icon, label, value }) => (
-    <div className="bg-[#121212] p-6 rounded-lg flex items-center gap-4">
+    <div
+      className="bg-[#121212] p-6 rounded-lg flex items-center gap-4"
+      data-aos="fade-up"
+    >
       <div className="bg-gray-800 p-3 rounded-full">{icon}</div>
       <div>
         <p className="text-gray-400 text-sm">{label}</p>
@@ -93,8 +96,8 @@ const DashboardPage = () => {
                 videoId={video._id}
                 thumbnail={video.thumbnail}
                 title={video.title}
-                views={video.views}
-                timestamp={new Date(video.createdAt).toLocaleDateString()}
+                views={video.views || 0}
+                timestamp={video.createdAt}
                 owner={user}
               />
             ))}

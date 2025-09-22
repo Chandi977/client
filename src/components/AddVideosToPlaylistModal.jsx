@@ -21,7 +21,7 @@ const AddVideosToPlaylistModal = ({
     setLoading(true);
     try {
       const response = await searchVideos(query);
-      setResults(response.data || []);
+      setResults(response.data.data || []);
     } catch (error) {
       toast.error("Failed to search for videos.");
     } finally {
@@ -41,7 +41,7 @@ const AddVideosToPlaylistModal = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-      <div className="bg-[#121212] rounded-lg w-full max-w-2xl p-4 flex flex-col h-[90vh]">
+      <div className="bg-black/50 backdrop-blur-lg border border-gray-700 rounded-lg w-full max-w-2xl p-4 flex flex-col h-[90vh]">
         <div className="flex justify-between items-center mb-4 flex-shrink-0">
           <h2 className="font-bold text-lg">Add videos to playlist</h2>
           <button

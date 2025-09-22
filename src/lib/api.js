@@ -12,14 +12,13 @@ const api = axios.create({
 
 // ----------------- REQUEST INTERCEPTOR -----------------
 // ----------------- RESPONSE INTERCEPTOR -----------------
-const handleResponse = (response) => response.data;
-const handleError = (error) => {
-  // Log error or show a toast, etc.
-  console.error("API call failed. " + error);
-  return Promise.reject(error.response?.data || error.message);
-};
-
-api.interceptors.response.use(handleResponse, handleError);
+// We will not use a success interceptor to ensure a consistent response shape (the full Axios response).
+// This helps avoid confusion between `response.data` and `response.data.data`.
+// The error interceptor can still be useful for global error handling.
+api.interceptors.response.use(
+  (response) => response, // Pass the full response through
+  (error) => Promise.reject(error) // Pass errors through
+);
 
 // ================= USER APIs =================
 
@@ -107,14 +106,27 @@ export const getTweetReplies = (tweetId) =>
   api.get(`/tweets/${tweetId}/replies`);
 
 // ================= LIKE APIs =================
+
+// -------- Video Likes --------
 export const toggleVideoLike = (videoId) =>
-  api.post(`/likes/toggle/v/${videoId}`);
+  api.post(`/likes/v/${videoId}/toggle`);
+export const getVideoLikes = (videoId) => api.get(`/likes/v/${videoId}`); // { count, isLiked }
+
+// -------- Comment Likes --------
 export const toggleCommentLike = (commentId) =>
-  api.post(`/likes/toggle/c/${commentId}`);
+  api.post(`/likes/c/${commentId}/toggle`);
+export const getCommentLikes = (commentId) => api.get(`/likes/c/${commentId}`); // { count, isLiked }
+
+// -------- Tweet Likes --------
+
+export const getTweetLikes = (tweetId) => api.get(`/likes/t/${tweetId}`); // { count, isLiked }
+
+// -------- User’s liked videos --------
 export const getAllLikedVideos = () => api.get(`/likes/videos`);
 
 // ================= COMMENT APIs =================
-export const getVideoComments = (videoId) => api.get(`/comments/${videoId}`);
+export const getVideoComments = (videoId, params) =>
+  api.get(`/comments/${videoId}`, { params });
 export const addComment = (videoId, data) =>
   api.post(`/comments/${videoId}`, data);
 export const updateComment = (commentId, data) =>

@@ -19,8 +19,8 @@ const LoginPage = () => {
     setError("");
     try {
       const response = await loginUser({ email, password });
-      handleLoginSuccess(response.data.user);
-      Cookies.set("authToken", response.data.token, { expires: 7 });
+      handleLoginSuccess(response.data.data.user);
+      Cookies.set("authToken", response.data.data.token, { expires: 7 });
       toast.success("Logged in successfully!");
       navigate("/"); // Redirect to home on success
     } catch (err) {

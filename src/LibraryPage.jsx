@@ -23,7 +23,7 @@ const LibraryPage = () => {
       try {
         setLoading(true);
         const response = await getUserPlaylists(user._id);
-        const playlistsData = response.data || [];
+        const playlistsData = response.data.data || [];
 
         // Asynchronously fetch the thumbnail for the first video of each playlist
         const playlistsWithThumbnails = await Promise.all(
@@ -39,7 +39,7 @@ const LibraryPage = () => {
               try {
                 const videoDetailsRes = await getVideoById(firstVideoId);
                 // The video object from getVideoById has the full thumbnail object
-                thumbnailUrl = videoDetailsRes.data?.thumbnail?.url;
+                thumbnailUrl = videoDetailsRes.data?.data?.thumbnail?.url;
               } catch (thumbError) {
                 console.error(
                   `Failed to fetch thumbnail for video ${firstVideoId} in playlist ${playlist.name}`,

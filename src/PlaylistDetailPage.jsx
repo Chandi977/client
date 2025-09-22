@@ -26,7 +26,7 @@ const PlaylistDetailPage = () => {
     setError(null);
     try {
       const playlistRes = await getPlaylistById(playlistId);
-      const playlistData = playlistRes.data;
+      const playlistData = playlistRes.data.data;
 
       // If the playlist contains videos, fetch their full details.
       // This ensures we have all necessary data like thumbnails and owner info.
@@ -38,7 +38,7 @@ const PlaylistDetailPage = () => {
         );
         const videoResponses = await Promise.all(videoDetailPromises);
         // Replace the potentially partial video data with full video data
-        playlistData.videos = videoResponses.map((res) => res.data);
+        playlistData.videos = videoResponses.map((res) => res.data.data);
       }
 
       setPlaylist(playlistData);

@@ -13,8 +13,8 @@ const VideoGrid = () => {
         setLoading(true);
         // Fetch more videos by setting a higher limit
         const response = await getAllVideos({ limit: 20 });
-        // console.log("API response:", response); // For debugging
-        setVideos(response.data.videos || []);
+        // The actual videos are in response.data.data.videos
+        setVideos(response.data.data.videos || []);
       } catch (err) {
         setError("Failed to fetch videos. Make sure your backend is running.");
         console.error(err);
@@ -42,7 +42,7 @@ const VideoGrid = () => {
             title={video.title}
             channel={video.owner?.username}
             views={video.views}
-            timestamp={new Date(video.createdAt).toLocaleDateString()}
+            timestamp={video.createdAt}
             owner={video.owner}
           />
         ))}
