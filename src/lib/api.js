@@ -1,38 +1,27 @@
 // src/api.js
 import axios from "axios";
-import Cookies from "js-cookie";
 
 const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
-const BASE_URL = `${BACKEND_URL}`;
-
 const api = axios.create({
-  baseURL: BASE_URL,
-  withCredentials: true, // Send cookies automatically
+  baseURL: BACKEND_URL,
+  withCredentials: true, // send cookies automatically
 });
 
-// ----------------- REQUEST INTERCEPTOR -----------------
-api.interceptors.request.use(
-  (config) => {
-    const token = Cookies.get("authToken");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
 // ----------------- RESPONSE INTERCEPTOR -----------------
-// We will not use a success interceptor to ensure a consistent response shape (the full Axios response).
-// This helps avoid confusion between `response.data` and `response.data.data`.
-// The error interceptor can still be useful for global error handling.
 api.interceptors.response.use(
-  (response) => response, // Pass the full response through
-  (error) => Promise.reject(error) // Pass errors through
+  (response) => response,
+  (error) => {
+    // Optional global auth error handling
+    if (error.response?.status === 401) {
+      // e.g., redirect to login page
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
 );
 
 // ================= USER APIs =================
-
 // Public
 export const registerUser = (formData) => api.post("/users/register", formData);
 export const loginUser = (credentials) => api.post("/users/login", credentials);
@@ -59,7 +48,6 @@ export const getLikedVideos = () => api.get("/users/liked-videos");
 export const getHistory = () => api.get("/users/history");
 
 // ================= VIDEO APIs =================
-
 // Public
 export const getAllVideos = (params = {}) =>
   api.get("/videos/getvideos", { params });
@@ -67,7 +55,8 @@ export const getVideoById = (videoId) => api.get(`/videos/${videoId}`);
 export const recordView = (videoId) => api.post(`/videos/${videoId}/view`);
 export const getUserVideos = (userId) => api.get(`/videos/user/${userId}`);
 export const searchVideos = (query) => api.get(`/videos/search?query=${query}`);
-export const streamVideo = (videoId) => `${BASE_URL}/videos/stream/${videoId}`;
+export const streamVideo = (videoId) =>
+  `${BACKEND_URL}/videos/stream/${videoId}`;
 export const getPublishedVideos = () => api.get("/videos/published/all");
 export const getUnpublishedVideos = () => api.get("/videos/unpublished/all");
 export const getTrendingVideos = () => api.get("/videos/trending/top");
@@ -103,36 +92,14 @@ export const getSubscribedChannels = (subscriberId) =>
 export const getUserSubscribers = (channelId) =>
   api.get(`/subscriptions/u/${channelId}`);
 
-// ================= TWEET APIs =================
-export const createTweet = (data) => api.post("/tweets", data);
-export const createTweetWithImage = (formData) => api.post("/tweets", formData);
-export const getUserTweets = (userId) => api.get(`/tweets/user/${userId}`);
-export const updateTweet = (tweetId, formData) =>
-  api.patch(`/tweets/${tweetId}`, formData);
-export const deleteTweet = (tweetId) => api.delete(`/tweets/${tweetId}`);
-export const toggleTweetLike = (tweetId) => api.post(`/tweets/${tweetId}/like`);
-export const toggleTweetShare = (tweetId) =>
-  api.post(`/tweets/${tweetId}/share`);
-export const getTweetReplies = (tweetId) =>
-  api.get(`/tweets/${tweetId}/replies`);
-
 // ================= LIKE APIs =================
-
-// -------- Video Likes --------
 export const toggleVideoLike = (videoId) =>
   api.post(`/likes/v/${videoId}/toggle`);
-export const getVideoLikes = (videoId) => api.get(`/likes/v/${videoId}`); // { count, isLiked }
-
-// -------- Comment Likes --------
+export const getVideoLikes = (videoId) => api.get(`/likes/v/${videoId}`);
 export const toggleCommentLike = (commentId) =>
   api.post(`/likes/c/${commentId}/toggle`);
-export const getCommentLikes = (commentId) => api.get(`/likes/c/${commentId}`); // { count, isLiked }
-
-// -------- Tweet Likes --------
-
-export const getTweetLikes = (tweetId) => api.get(`/likes/t/${tweetId}`); // { count, isLiked }
-
-// -------- User’s liked videos --------
+export const getCommentLikes = (commentId) => api.get(`/likes/c/${commentId}`);
+export const getTweetLikes = (tweetId) => api.get(`/likes/t/${tweetId}`);
 export const getAllLikedVideos = () => api.get(`/likes/videos`);
 
 // ================= COMMENT APIs =================
@@ -164,8 +131,6 @@ export const leaveLiveStream = (streamId) =>
   api.post(`/livestreams/${streamId}/leave`);
 export const getStreamAnalytics = (streamId) =>
   api.get(`/livestreams/${streamId}/analytics`);
-
-// Live Comments
 export const getLiveComments = (streamId) =>
   api.get(`/livestreams/${streamId}/comments`);
 export const addLiveComment = (streamId, data) =>
