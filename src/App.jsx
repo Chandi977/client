@@ -18,6 +18,7 @@ import LibraryPage from "./LibraryPage";
 import PlaylistDetailPage from "./PlaylistDetailPage";
 import SubscriptionsPage from "./SubscriptionsPage";
 import TrendingPage from "./TrendingPage";
+import OAuthSuccessPage from "./OAuthSuccessPage";
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(
@@ -63,6 +64,7 @@ function App() {
               <Route path="/" element={<VideoGrid />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
+              <Route path="/oauth-success" element={<OAuthSuccessPage />} />
               <Route path="/video/:id" element={<VideoDetailPage />} />
               <Route path="/liked-videos" element={<LikedVideosPage />} />
               <Route path="/history" element={<HistoryPage />} />

@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { registerUser } from "./lib/api";
-import { useUser } from "./components/UserContext";
-import Cookies from "js-cookie";
 import toast from "react-hot-toast";
+import { useOAuth } from "./hooks/useOAuth";
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -16,7 +15,7 @@ const RegisterPage = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { handleLoginSuccess } = useUser();
+  const { handleOAuthLogin } = useOAuth();
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -50,48 +49,6 @@ const RegisterPage = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
-
-  useEffect(() => {
-    const handleMessage = (event) => {
-      // IMPORTANT: Check the origin of the message for security
-      if (event.origin !== window.location.origin) {
-        return;
-      }
-
-      const { data, error } = event.data;
-
-      if (data && data.user && data.token) {
-        handleLoginSuccess(data.user);
-        Cookies.set("authToken", data.token, { expires: 7 });
-        toast.success("Logged in successfully!");
-        navigate("/");
-      } else if (error) {
-        toast.error(error);
-      }
-    };
-
-    window.addEventListener("message", handleMessage);
-
-    return () => {
-      window.removeEventListener("message", handleMessage);
-    };
-  }, [handleLoginSuccess, navigate]);
-
-  const handleOAuthLogin = (provider) => {
-    const oauthUrl = `${BACKEND_URL}/auth/${provider}`;
-    const width = 600;
-    const height = 700;
-    const left = window.screen.width / 2 - width / 2;
-    const top = window.screen.height / 2 - height / 2;
-
-    window.open(
-      oauthUrl,
-      "_blank",
-      `width=${width},height=${height},top=${top},left=${left}`
-    );
   };
 
   return (
