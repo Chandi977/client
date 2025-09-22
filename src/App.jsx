@@ -22,6 +22,7 @@ const SubscriptionsPage = lazy(() => import("./SubscriptionsPage"));
 const TrendingPage = lazy(() => import("./TrendingPage"));
 const OAuthSuccessPage = lazy(() => import("./OAuthSuccessPage"));
 const UploadPage = lazy(() => import("./UploadPage"));
+const HealthCheckPage = lazy(() => import("./HealthCheckPage"));
 
 const SuspenseFallback = () => (
   <div className="flex-1 p-6 text-center">Loading page...</div>
@@ -85,6 +86,7 @@ function App() {
                   path="/playlist/:playlistId"
                   element={<PlaylistDetailPage />}
                 />
+                <Route path="/healthcheck" element={<HealthCheckPage />} />
                 <Route path="/subscriptions" element={<SubscriptionsPage />} />
                 <Route path="/trending" element={<TrendingPage />} />
               </Routes>

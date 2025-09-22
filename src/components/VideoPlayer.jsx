@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Hls from "hls.js";
 import {
   Play,
@@ -13,6 +13,7 @@ import {
   Check,
 } from "lucide-react";
 
+const LAZY_LOAD_OFFSET = "200px";
 const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
   const videoRef = useRef(null);
   const playerContainerRef = useRef(null);
@@ -32,10 +33,34 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
   const [qualities, setQualities] = useState([]);
   const [currentQuality, setCurrentQuality] = useState(-1); // -1 for auto
 
+  const [shouldLoad, setShouldLoad] = useState(false);
+
+  const onIntersection = useCallback((entries) => {
+    const [entry] = entries;
+    if (entry.isIntersecting) {
+      setShouldLoad(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(onIntersection, {
+      rootMargin: LAZY_LOAD_OFFSET,
+    });
+    const currentRef = playerContainerRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [onIntersection]);
+
   // HLS setup and player event listeners
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || !shouldLoad) return;
 
     const setupHls = () => {
       if (Hls.isSupported()) {
@@ -43,12 +68,10 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
         hlsRef.current = hls;
         hls.loadSource(src);
         hls.attachMedia(video);
-
         hls.on(Hls.Events.MANIFEST_PARSED, (_, data) => {
           setQualities(data.levels);
           setCurrentQuality(-1); // Auto
         });
-
         hls.on(Hls.Events.LEVEL_SWITCHED, (_, data) => {
           setCurrentQuality(data.level);
         });
@@ -57,10 +80,9 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
       }
     };
 
-    if (src && src.endsWith(".m3u8")) {
-      setupHls();
-    } else if (src) {
-      video.src = src;
+    if (src) {
+      if (src.endsWith(".m3u8")) setupHls();
+      else video.src = src;
     }
 
     const handlePlay = () => setIsPlaying(true);
@@ -80,9 +102,9 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
       video.removeEventListener("pause", handlePause);
       video.removeEventListener("timeupdate", handleTimeUpdate);
       video.removeEventListener("durationchange", handleDurationChange);
-      video.removeEventListener("play", onPlay);
+      if (onPlay) video.removeEventListener("play", onPlay);
     };
-  }, [src, onPlay]);
+  }, [src, onPlay, shouldLoad]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -180,6 +202,7 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
         poster={poster}
         onClick={togglePlayPause}
         playsInline
+        preload="metadata"
       />
 
       <div

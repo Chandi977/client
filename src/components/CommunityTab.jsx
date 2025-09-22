@@ -123,6 +123,7 @@ const CommunityTab = ({ channel }) => {
                 <button
                   onClick={() => handleDeleteTweet(tweet._id)}
                   className="p-2 text-gray-400 hover:text-red-500 rounded-full"
+                  aria-label="Delete post"
                 >
                   <Trash2 size={18} />
                 </button>

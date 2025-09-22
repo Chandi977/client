@@ -40,6 +40,7 @@ const Header = ({ onMenuClick }) => {
       <div className="flex items-center gap-4">
         <button
           onClick={onMenuClick}
+          aria-label="Toggle sidebar"
           className="p-2 rounded-full hover:bg-gray-800"
         >
           <Menu size={24} />
@@ -64,6 +65,7 @@ const Header = ({ onMenuClick }) => {
           />
           <button
             type="submit"
+            aria-label="Search"
             className="bg-gray-800 border border-gray-700 border-l-0 rounded-r-full px-6 hover:bg-gray-700"
           >
             <Search size={20} />
@@ -74,11 +76,17 @@ const Header = ({ onMenuClick }) => {
       {/* Right Section */}
       <div className="flex items-center gap-2">
         <Link to="/upload">
-          <button className="p-2 rounded-full hover:bg-gray-800">
+          <button
+            aria-label="Upload video"
+            className="p-2 rounded-full hover:bg-gray-800"
+          >
             <Video size={24} />
           </button>
         </Link>
-        <button className="p-2 rounded-full hover:bg-gray-800">
+        <button
+          aria-label="Notifications"
+          className="p-2 rounded-full hover:bg-gray-800"
+        >
           <Bell size={24} />
         </button>
         {isLoggedIn && user ? (

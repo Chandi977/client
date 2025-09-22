@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, lazy, Suspense } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { ThumbsUp, Share2, Download, ListPlus } from "lucide-react";
+import { Helmet } from "react-helmet-async";
 import toast from "react-hot-toast";
 import VideoCard from "./components/VideoCard";
 import * as api from "./lib/api";
@@ -171,6 +172,13 @@ const VideoDetailPage = () => {
 
   return (
     <div className="flex flex-col lg:flex-row p-4 md:p-6 gap-6">
+      <Helmet>
+        <title>{`${video.title} - YoutubeClone`}</title>
+        <meta name="description" content={video.description} />
+        <meta property="og:title" content={video.title} />
+        <meta property="og:description" content={video.description} />
+        <meta property="og:image" content={secureUrl(video.thumbnail?.url)} />
+      </Helmet>
       <div className="w-full lg:flex-1 min-w-0">
         <div className="aspect-video bg-black rounded-xl mb-4 overflow-hidden">
           <VideoPlayer

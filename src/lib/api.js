@@ -102,6 +102,11 @@ export const getCommentLikes = (commentId) => api.get(`/likes/c/${commentId}`);
 export const getTweetLikes = (tweetId) => api.get(`/likes/t/${tweetId}`);
 export const getAllLikedVideos = () => api.get(`/likes/videos`);
 
+// ================= TWEET APIs =================
+export const createTweet = (data) => api.post("/tweets", data);
+export const getUserTweets = (userId) => api.get(`/tweets/user/${userId}`);
+export const deleteTweet = (tweetId) => api.delete(`/tweets/${tweetId}`);
+
 // ================= COMMENT APIs =================
 export const getVideoComments = (videoId, params) =>
   api.get(`/comments/${videoId}`, { params });

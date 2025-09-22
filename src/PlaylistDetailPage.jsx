@@ -126,6 +126,7 @@ const PlaylistDetailPage = () => {
                     onClick={() => handleRemoveVideo(video._id)}
                     className="p-2 rounded-full hover:bg-gray-700 opacity-0 group-hover:opacity-100 transition-opacity"
                     title="Remove from playlist"
+                    aria-label="Remove from playlist"
                   >
                     <Trash2 size={20} />
                   </button>

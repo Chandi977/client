@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import toast from "react-hot-toast";
 import {
   getUserChannelProfile,
@@ -90,6 +91,15 @@ const ChannelPage = () => {
 
   return (
     <div className="bg-[#0f0f0f] text-white min-h-screen">
+      <Helmet>
+        <title>{`${channel.fullName} (@${channel.username}) - YoutubeClone`}</title>
+        <meta
+          name="description"
+          content={`Watch videos from ${channel.fullName} on YoutubeClone.`}
+        />
+        <meta property="og:title" content={channel.fullName} />
+        <meta property="og:image" content={secureUrl(channel.avatar)} />
+      </Helmet>
       {/* Cover Image */}
       <div className="w-full h-48 bg-gray-800">
         {channel.coverImage && (
