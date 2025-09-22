@@ -2,18 +2,42 @@ import { useEffect } from "react";
 
 const OAuthSuccessPage = () => {
   useEffect(() => {
-    // This page is loaded in the popup window after a successful OAuth login.
-    // The backend has already set the necessary httpOnly cookies.
-    // Now, we need to notify the main application window that the login was successful
-    // so it can update its state (e.g., fetch user data) and close this popup.
+    const params = new URLSearchParams(window.location.search);
+    const userStr = params.get("user");
 
-    if (window.opener) {
-      // Send a message to the parent window.
-      // The parent window (LoginPage/RegisterPage) is listening for this.
-      window.opener.postMessage({ oauthSuccess: true }, window.location.origin);
-      // The parent window will be responsible for closing the popup.
+    if (window.opener && userStr) {
+      try {
+        const user = JSON.parse(decodeURIComponent(userStr));
+        // The backend has already set the httpOnly cookie.
+        // We send the user object to the main window to update the UI immediately.
+        window.opener.postMessage({ user }, window.location.origin);
+      } catch (error) {
+        // Handle potential JSON parsing errors
+        window.opener.postMessage(
+          { error: "Failed to parse user data." },
+          window.location.origin
+        );
+      } finally {
+        // Close the popup window once the message is sent
+        window.close();
+      }
+    } else if (window.opener) {
+      // Handle case where user data is not in the URL
+      window.opener.postMessage(
+        { error: "Authentication failed. No user data received." },
+        window.location.origin
+      );
+      window.close();
     }
   }, []);
+
+  if (!window.opener) {
+    return (
+      <div className="p-6 text-center">
+        Authentication successful! You can now close this tab.
+      </div>
+    );
+  }
 
   return <div className="p-6 text-center">Authenticating... Please wait.</div>;
 };

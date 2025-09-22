@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { registerUser } from "./lib/api";
 import { useUser } from "./components/UserContext";
@@ -52,7 +52,31 @@ const RegisterPage = () => {
   };
 
   const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
-  console.log(BACKEND_URL);
+
+  useEffect(() => {
+    const handleMessage = (event) => {
+      // IMPORTANT: Check the origin of the message for security
+      if (event.origin !== window.location.origin) {
+        return;
+      }
+
+      const { user, error } = event.data;
+
+      if (user) {
+        handleLoginSuccess(user);
+        toast.success("Logged in successfully!");
+        navigate("/");
+      } else if (error) {
+        toast.error(error);
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+
+    return () => {
+      window.removeEventListener("message", handleMessage);
+    };
+  }, [handleLoginSuccess, navigate]);
 
   const handleOAuthLogin = (provider) => {
     const oauthUrl = `${BACKEND_URL}/auth/${provider}`;
@@ -61,23 +85,11 @@ const RegisterPage = () => {
     const left = window.screen.width / 2 - width / 2;
     const top = window.screen.height / 2 - height / 2;
 
-    const authWindow = window.open(
+    window.open(
       oauthUrl,
       "_blank",
       `width=${width},height=${height},top=${top},left=${left}`
     );
-
-    window.addEventListener("message", function handler(event) {
-      if (event.origin !== BACKEND_URL) return;
-      const { token, user } = event.data || {};
-      if (token && user) {
-        handleLoginSuccess(user);
-        toast.success("Logged in via " + provider + "!");
-        navigate("/");
-        authWindow.close();
-        window.removeEventListener("message", handler);
-      }
-    });
   };
 
   return (
