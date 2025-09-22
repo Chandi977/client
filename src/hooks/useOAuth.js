@@ -17,15 +17,10 @@ export const useOAuth = () => {
         return;
       }
 
-      const { data, error } = event.data;
+      const { oauthSuccess } = event.data;
 
-      if (data && data.user && data.token) {
-        handleLoginSuccess(data.user);
-        Cookies.set("authToken", data.token, { expires: 7 });
-        toast.success("Logged in successfully!");
-        navigate("/");
-      } else if (error) {
-        toast.error(error);
+      if (oauthSuccess) {
+        window.location.reload();
       }
     };
 
