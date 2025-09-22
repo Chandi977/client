@@ -6,6 +6,7 @@ import {
   ListVideo,
   Users,
   TrendingUp,
+  Radio,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useUser } from "./UserContext";
@@ -16,6 +17,7 @@ const Sidebar = ({ isOpen }) => {
   const mainLinks = [
     { icon: <Home />, text: "Home", to: "/" },
     { icon: <TrendingUp />, text: "Trending", to: "/trending" },
+    { icon: <Radio />, text: "Live", to: "/live" },
     { icon: <Users />, text: "Subscriptions", to: "/subscriptions" },
   ];
 

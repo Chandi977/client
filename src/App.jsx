@@ -22,6 +22,9 @@ const SubscriptionsPage = lazy(() => import("./SubscriptionsPage"));
 const TrendingPage = lazy(() => import("./TrendingPage"));
 const OAuthSuccessPage = lazy(() => import("./OAuthSuccessPage"));
 const UploadPage = lazy(() => import("./UploadPage"));
+const LiveStreamPage = lazy(() => import("./LiveStreamPage"));
+const GoLivePage = lazy(() => import("./GoLivePage"));
+const LiveStreamViewerPage = lazy(() => import("./LiveStreamViewerPage"));
 const HealthCheckPage = lazy(() => import("./HealthCheckPage"));
 
 const SuspenseFallback = () => (
@@ -86,6 +89,9 @@ function App() {
                   path="/playlist/:playlistId"
                   element={<PlaylistDetailPage />}
                 />
+                <Route path="/go-live" element={<GoLivePage />} />
+                <Route path="/live/:streamId" element={<LiveStreamViewerPage />} />
+                <Route path="/live" element={<LiveStreamPage />} />
                 <Route path="/healthcheck" element={<HealthCheckPage />} />
                 <Route path="/subscriptions" element={<SubscriptionsPage />} />
                 <Route path="/trending" element={<TrendingPage />} />

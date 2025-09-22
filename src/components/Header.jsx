@@ -11,6 +11,7 @@ import {
   LayoutDashboard,
   User,
   Youtube,
+  Radio,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useUser } from "./UserContext";
@@ -138,6 +139,13 @@ const Header = ({ onMenuClick }) => {
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <History size={18} /> History
+                </Link>
+                <Link
+                  to="/go-live"
+                  className="flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-700"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <Radio size={18} /> Go Live
                 </Link>
                 <button
                   onClick={handleLogout}
