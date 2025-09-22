@@ -1,64 +1,57 @@
-import { createContext, useState, useEffect, useContext } from "react";
-import { getCurrentUser, logoutUser } from "../lib/api";
+import React, {
+  createContext,
+  useState,
+  useContext,
+  useEffect,
+  useCallback,
+} from "react";
 import Cookies from "js-cookie";
-import toast from "react-hot-toast";
+import * as api from "../lib/api";
 
 const UserContext = createContext(null);
+
+export const useUser = () => useContext(UserContext);
 
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const handleLogout = async () => {
-    try {
-      await logoutUser();
-      toast.success("Logged out successfully");
-    } catch (error) {
-      console.error(
-        "Logout failed on server, but proceeding on client.",
-        error
-      );
-    } finally {
-      setUser(null);
-      setIsLoggedIn(false);
-    }
-  };
-
   useEffect(() => {
-    const fetchUser = async () => {
-      // Attempt to fetch user on initial load to check for a valid session cookie
+    const fetchCurrentUser = async () => {
+      const token = Cookies.get("authToken");
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
       try {
-        const response = await getCurrentUser();
-        if (response.success) {
-          setUser(response.data);
-          setIsLoggedIn(true);
-        }
+        const response = await api.getCurrentUser(); // Assumes this calls /api/v1/users/me
+        setUser(response.data);
+        setIsLoggedIn(true);
       } catch (error) {
-        // It's okay if this fails, it just means user is not logged in.
-        // No need to show an error toast here.
-        console.log("No active session or session expired.");
+        console.error("Session expired or invalid:", error);
+        Cookies.remove("authToken");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUser();
+    fetchCurrentUser();
   }, []);
-  const handleLoginSuccess = (userData) => {
+
+  const handleLoginSuccess = useCallback((loggedInUser) => {
+    setUser(loggedInUser);
     setIsLoggedIn(true);
-    setUser(userData);
-  };
+  }, []);
+
+  const handleLogout = useCallback(() => {
+    Cookies.remove("authToken");
+    setUser(null);
+    setIsLoggedIn(false);
+  }, []);
 
   const value = { user, isLoggedIn, loading, handleLoginSuccess, handleLogout };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
-};
-
-export const useUser = () => {
-  const context = useContext(UserContext);
-  if (context === undefined) {
-    throw new Error("useUser must be used within a UserProvider");
-  }
-  return context;
 };

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Menu,
   Search,
@@ -11,6 +11,8 @@ import {
   LayoutDashboard,
   User,
   Youtube,
+  Sun,
+  Moon,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useUser } from "./UserContext";
@@ -20,6 +22,21 @@ const Header = ({ onMenuClick }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, isLoggedIn, handleLogout: contextLogout } = useUser();
+  const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
+
+  useEffect(() => {
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prevTheme) => (prevTheme === "dark" ? "light" : "dark"));
+    setIsMenuOpen(false);
+  };
 
   const handleLogout = async () => {
     await contextLogout();
@@ -52,8 +69,8 @@ const Header = ({ onMenuClick }) => {
       </div>
 
       {/* Center Section */}
-      <div className="flex-1 flex justify-center px-4 lg:px-16">
-        <form onSubmit={handleSearch} className="w-full max-w-2xl flex">
+      <div className="hidden sm:flex flex-1 justify-center px-4">
+        <form onSubmit={handleSearch} className="w-full max-w-md flex">
           <input
             type="text"
             placeholder="Search"
@@ -71,13 +88,20 @@ const Header = ({ onMenuClick }) => {
       </div>
 
       {/* Right Section */}
-      <div className="flex items-center gap-2">
-        <Link to="/upload">
-          <button className="p-2 rounded-full hover:bg-gray-800">
-            <Video size={24} />
-          </button>
-        </Link>
-        <button className="p-2 rounded-full hover:bg-gray-800">
+      <div className="flex items-center gap-2 sm:gap-4">
+        {/* Search Icon for mobile */}
+        <button className="p-2 rounded-full hover:bg-gray-800 sm:hidden">
+          <Search size={20} />
+        </button>
+
+        {isLoggedIn && (
+          <Link to="/upload" className="hidden sm:block">
+            <button className="p-2 rounded-full hover:bg-gray-800">
+              <Video size={24} />
+            </button>
+          </Link>
+        )}
+        <button className="p-2 rounded-full hover:bg-gray-800 hidden sm:block">
           <Bell size={24} />
         </button>
         {isLoggedIn && user ? (
@@ -85,7 +109,7 @@ const Header = ({ onMenuClick }) => {
             <button onClick={() => setIsMenuOpen(!isMenuOpen)}>
               <img
                 src={user.avatar}
-                alt={user.username}
+                alt={user.fullName}
                 className="w-8 h-8 rounded-full cursor-pointer"
               />
             </button>
@@ -130,6 +154,15 @@ const Header = ({ onMenuClick }) => {
                 >
                   <History size={18} /> History
                 </Link>
+                <div className="border-t border-gray-700 my-1"></div>
+                <button
+                  onClick={toggleTheme}
+                  className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-700"
+                >
+                  {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+                  <span>{theme === "dark" ? "Light Mode" : "Dark Mode"}</span>
+                </button>
+                <div className="border-t border-gray-700 my-1"></div>
                 <button
                   onClick={handleLogout}
                   className="w-full text-left flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-700"
@@ -141,7 +174,7 @@ const Header = ({ onMenuClick }) => {
           </div>
         ) : (
           <Link to="/login">
-            <button className="flex items-center gap-2 border border-gray-700 px-3 py-1.5 rounded-full text-blue-400 hover:bg-blue-900/50">
+            <button className="flex items-center gap-2 border border-gray-700 px-3 py-1.5 rounded-full text-blue-400 hover:bg-blue-900/50 whitespace-nowrap">
               <User size={20} /> Sign In
             </button>
           </Link>

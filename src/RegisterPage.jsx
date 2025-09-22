@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { registerUser } from "./lib/api";
 import { useUser } from "./components/UserContext";
+import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 
 const RegisterPage = () => {
@@ -60,10 +61,11 @@ const RegisterPage = () => {
         return;
       }
 
-      const { user, error } = event.data;
+      const { data, error } = event.data;
 
-      if (user) {
-        handleLoginSuccess(user);
+      if (data && data.user && data.token) {
+        handleLoginSuccess(data.user);
+        Cookies.set("authToken", data.token, { expires: 7 });
         toast.success("Logged in successfully!");
         navigate("/");
       } else if (error) {

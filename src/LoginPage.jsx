@@ -20,6 +20,7 @@ const LoginPage = () => {
     try {
       const response = await loginUser({ email, password });
       handleLoginSuccess(response.data.user);
+      Cookies.set("authToken", response.data.token, { expires: 7 });
       toast.success("Logged in successfully!");
       navigate("/"); // Redirect to home on success
     } catch (err) {

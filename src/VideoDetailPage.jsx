@@ -41,25 +41,33 @@ const VideoDetailPage = () => {
     setLoading(true);
     setError(null);
     try {
-      const [videoRes, commentsRes, allVideosRes] = await Promise.all([
+      // Fetch critical data first.
+      const [videoRes, allVideosRes] = await Promise.all([
         api.getVideoById(id),
-        api.getVideoComments(id),
         api.getAllVideos({ limit: 10 }),
       ]);
 
-      const populatedComments = (commentsRes?.data?.docs || []).map((c) => ({
-        ...c,
-        owner:
-          c.owner && typeof c.owner === "object"
-            ? c.owner
-            : { username: "Unknown", avatar: "" },
-      }));
-
       setVideo(videoRes?.data || null);
-      setComments(populatedComments);
       setRecommendedVideos(
         allVideosRes?.data?.videos?.filter((v) => v._id !== id) || []
       );
+
+      // Fetch non-critical data (comments) separately and handle its error gracefully.
+      try {
+        const commentsRes = await api.getVideoComments(id);
+        const populatedComments = (commentsRes?.data?.docs || []).map((c) => ({
+          ...c,
+          owner:
+            c.owner && typeof c.owner === "object"
+              ? c.owner
+              : { username: "Unknown", avatar: "" },
+        }));
+        setComments(populatedComments);
+      } catch (commentsError) {
+        console.error("Failed to load comments:", commentsError);
+        toast.error("Could not load comments.");
+        setComments([]); // Show empty comments on failure
+      }
     } catch (err) {
       setError("Failed to load video details.");
     } finally {
@@ -181,8 +189,8 @@ const VideoDetailPage = () => {
   if (!video) return <div className="p-6 text-center">Video not found.</div>;
 
   return (
-    <div className="flex p-6 gap-6">
-      <div className="flex-grow">
+    <div className="flex flex-col lg:flex-row p-4 md:p-6 gap-6">
+      <div className="w-full lg:flex-grow">
         <div className="aspect-video bg-black rounded-xl mb-4 overflow-hidden">
           <video
             className="w-full h-full"
@@ -194,7 +202,7 @@ const VideoDetailPage = () => {
         </div>
 
         <h1 className="text-2xl font-bold mb-2">{video.title}</h1>
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
           <div className="flex items-center gap-3">
             <Link
               to={`/channel/${video.owner?.username}`}
@@ -224,7 +232,7 @@ const VideoDetailPage = () => {
             </button>
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap justify-start sm:justify-end">
             <button
               onClick={handleToggleVideoLike}
               className={`flex items-center gap-2 bg-gray-800 px-4 py-2 rounded-full hover:bg-gray-700 ${
@@ -269,7 +277,7 @@ const VideoDetailPage = () => {
         />
       </div>
 
-      <div className="w-96 flex-shrink-0">
+      <div className="w-full lg:w-96 lg:flex-shrink-0">
         <h2 className="text-xl font-bold mb-4">Up next</h2>
         <div className="flex flex-col gap-4">
           {recommendedVideos.map((recVideo, idx) => (
