@@ -1,5 +1,25 @@
-import { useState, useEffect } from "react";
-import { publishVideo } from "../lib/api";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import { UploadCloud } from "lucide-react";
+import axios from "axios";
+import * as api from "../lib/api";
+import { useUser } from "../components/UserContext";
+
+const formatSpeed = (bytesPerSecond) => {
+  if (bytesPerSecond < 1024) return `${bytesPerSecond.toFixed(2)} B/s`;
+  if (bytesPerSecond < 1024 * 1024)
+    return `${(bytesPerSecond / 1024).toFixed(2)} KB/s`;
+  return `${(bytesPerSecond / (1024 * 1024)).toFixed(2)} MB/s`;
+};
+
+const formatTime = (seconds) => {
+  if (!isFinite(seconds) || seconds < 0) return "calculating...";
+  if (seconds < 60) return `${Math.round(seconds)}s`;
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.round(seconds % 60);
+  return `${minutes}m ${remainingSeconds}s`;
+};
 
 const UploadPage = () => {
   const [title, setTitle] = useState("");
@@ -7,20 +27,96 @@ const UploadPage = () => {
   const [videoFile, setVideoFile] = useState(null);
   const [thumbnailFile, setThumbnailFile] = useState(null);
   const [thumbnailPreview, setThumbnailPreview] = useState("");
-  const [uploadState, setUploadState] = useState({
-    status: "idle", // idle, uploading, success, error
-    progress: 0,
-    message: "",
-  });
+
+  const [uploadStatus, setUploadStatus] = useState("idle"); // idle, uploading, processing, success, error, canceled
+  const [progress, setProgress] = useState(0);
+  const [uploadSpeed, setUploadSpeed] = useState(0);
+  const [estimatedTime, setEstimatedTime] = useState(0);
+  const [processingStages, setProcessingStages] = useState({}); // { stageName: { percent, eta } }
+
+  const { user } = useUser();
+  const progressRef = useRef({ lastLoaded: 0, lastTimestamp: 0 });
+  const cancelTokenRef = useRef(null);
+  const videoIdRef = useRef(null);
+  const navigate = useNavigate();
+
+  const videoPlayerRef = useRef(null);
 
   useEffect(() => {
-    // Cleanup function to revoke the object URL to avoid memory leaks
     return () => {
-      if (thumbnailPreview) {
-        URL.revokeObjectURL(thumbnailPreview);
-      }
+      if (thumbnailPreview) URL.revokeObjectURL(thumbnailPreview);
     };
   }, [thumbnailPreview]);
+
+  // WebSocket for processing stages
+  useEffect(() => {
+    if (uploadStatus !== "processing" || !user?._id || !videoIdRef.current)
+      return;
+
+    const wsUrl = (
+      import.meta.env.VITE_API_URL || "http://localhost:8000"
+    ).replace(/^http/, "ws");
+    const ws = new WebSocket(wsUrl);
+
+    ws.onopen = () => {
+      ws.send(
+        JSON.stringify({
+          type: "subscribe",
+          channel: `video-processing:${user._id}`,
+        })
+      );
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.videoId !== videoIdRef.current) return;
+
+        switch (data.type) {
+          case "processing-progress":
+            setProcessingStages((prev) => ({
+              ...prev,
+              [data.stage]: { percent: data.percent, eta: data.eta },
+            }));
+            break;
+          case "video-ready":
+            setUploadStatus("success");
+            toast.success("Video ready!");
+            // Automatically set video source
+            if (videoPlayerRef.current) {
+              videoPlayerRef.current.src = data.videoUrl;
+              videoPlayerRef.current.load();
+              videoPlayerRef.current.play();
+            }
+            break;
+          case "processing-failed":
+            setUploadStatus("error");
+            toast.error(`Processing failed: ${data.message}`);
+            break;
+        }
+      } catch (e) {
+        console.error("WebSocket parse error:", e);
+      }
+    };
+
+    ws.onerror = (err) => {
+      console.error("WebSocket error:", err);
+      toast.error("Processing server connection failed.");
+      setUploadStatus("error");
+    };
+
+    return () => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(
+          JSON.stringify({
+            type: "unsubscribe",
+            channel: `video-processing:${user._id}`,
+          })
+        );
+        ws.close();
+      }
+    };
+  }, [uploadStatus, user?._id]);
 
   const handleThumbnailChange = (e) => {
     const file = e.target.files[0];
@@ -30,177 +126,184 @@ const UploadPage = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    // In a real app, you would send this formData to your backend API
+  const handleUploadProgress = (e) => {
+    const { loaded, total = 0 } = e;
+    const percent = Math.floor((loaded * 100) / total);
+    setProgress(percent);
+
+    const now = performance.now();
+    const bytesLoaded = loaded - progressRef.current.lastLoaded;
+    const timeElapsed = (now - progressRef.current.lastTimestamp) / 1000;
+
+    if (total > 0 && timeElapsed > 0.5) {
+      const speed = bytesLoaded / timeElapsed;
+      setUploadSpeed(speed);
+      setEstimatedTime((total - loaded) / speed);
+      progressRef.current = { lastLoaded: loaded, lastTimestamp: now };
+    }
+  };
+
+  const startUpload = async () => {
+    if (!videoFile || !thumbnailFile || !title) {
+      toast.error("Please fill all required fields.");
+      return;
+    }
+
+    setUploadStatus("uploading");
+    setProgress(0);
+    setUploadSpeed(0);
+    setEstimatedTime(0);
+    setProcessingStages({});
+    progressRef.current = { lastLoaded: 0, lastTimestamp: performance.now() };
+    cancelTokenRef.current = new AbortController();
+
     const formData = new FormData();
     formData.append("title", title);
     formData.append("description", description);
-    formData.append("videoFile", videoFile); // Corrected field name
+    formData.append("videoFile", videoFile);
     formData.append("thumbnail", thumbnailFile);
 
-    setUploadState({
-      status: "uploading",
-      progress: 0,
-      message: "Starting upload...",
-    });
-
     try {
-      await publishVideo(formData, {
-        onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round(
-            (progressEvent.loaded * 100) / progressEvent.total
-          );
-          setUploadState({
-            status: "uploading",
-            progress: percentCompleted,
-            message: `Uploading... ${percentCompleted}%`,
-          });
-        },
+      const response = await api.publishVideo(formData, {
+        onUploadProgress: handleUploadProgress,
+        signal: cancelTokenRef.current.signal,
       });
-      setUploadState({
-        status: "success",
-        progress: 100,
-        message: "Upload successful!",
-      });
+
+      const uploadedVideo = response.data.data;
+      videoIdRef.current = uploadedVideo._id;
+      setUploadStatus("processing");
+      toast.success("Upload complete! Processing started...");
     } catch (error) {
-      console.error("Upload failed:", error);
-      setUploadState({
-        status: "error",
-        progress: 0,
-        message: "Upload failed. Please try again.",
-      });
+      if (axios.isCancel(error)) {
+        setUploadStatus("canceled");
+        toast.error("Upload canceled");
+      } else {
+        setUploadStatus("error");
+        toast.error(error.response?.data?.message || "Upload failed");
+      }
     }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    startUpload();
+  };
+
+  const handleCancelUpload = () => cancelTokenRef.current?.abort();
+  const handleRetryUpload = () => {
+    setUploadStatus("idle");
+    setProgress(0);
+    setProcessingStages({});
+    startUpload();
   };
 
   return (
     <div className="flex justify-center items-center min-h-[calc(100vh-3.5rem)] bg-[#0f0f0f]">
-      <div className="w-full max-w-2xl p-8 space-y-6 bg-[#121212] rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold text-center text-white">
-          Upload Video
+      <div className="w-full max-w-2xl p-6 space-y-4 bg-[#121212] rounded-lg shadow-md">
+        <h1 className="text-2xl font-bold text-white flex items-center gap-2 justify-center">
+          <UploadCloud /> Upload Video
         </h1>
-        <form
-          className="space-y-6"
-          onSubmit={handleSubmit}
-          // Prevent submission if already uploading
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && uploadState.status === "uploading") {
-              e.preventDefault();
+
+        {/* Video Player */}
+        <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
+          <video ref={videoPlayerRef} className="w-full h-full" controls />
+          {(uploadStatus === "uploading" || uploadStatus === "processing") && (
+            <div className="absolute inset-0 bg-black bg-opacity-70 flex flex-col justify-center items-center text-white space-y-2">
+              {uploadStatus === "uploading" && (
+                <>
+                  <p>Uploading {progress}%</p>
+                  <p>
+                    {formatSpeed(uploadSpeed)} • {formatTime(estimatedTime)}{" "}
+                    left
+                  </p>
+                </>
+              )}
+              {uploadStatus === "processing" &&
+                Object.entries(processingStages).map(([stage, info]) => (
+                  <div key={stage} className="w-11/12">
+                    <p>
+                      {stage}: {info.percent}%
+                    </p>
+                    <div className="w-full bg-gray-700 h-2.5 rounded-full">
+                      <div
+                        className="bg-green-600 h-2.5 rounded-full transition-all duration-300"
+                        style={{ width: `${info.percent}%` }}
+                      />
+                    </div>
+                    <p className="text-xs">
+                      {info.eta ? `ETA: ${info.eta}` : "calculating..."}
+                    </p>
+                  </div>
+                ))}
+            </div>
+          )}
+        </div>
+
+        {/* Form */}
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <input
+            type="text"
+            placeholder="Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="w-full p-2 rounded bg-[#0f0f0f] border border-gray-700 text-white"
+            disabled={
+              uploadStatus === "uploading" || uploadStatus === "processing"
             }
-          }}
-        >
-          <div>
-            <label
-              htmlFor="title"
-              className="block text-sm font-medium text-gray-300"
-            >
-              Title
-            </label>
-            <input
-              type="text"
-              id="title"
-              className="w-full px-3 py-2 mt-1 text-white bg-[#0f0f0f] border border-gray-700 rounded-md focus:outline-none focus:ring focus:ring-blue-500"
-              placeholder="My Awesome Video"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              disabled={uploadState.status === "uploading"}
-              required
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="description"
-              className="block text-sm font-medium text-gray-300"
-            >
-              Description
-            </label>
-            <textarea
-              id="description"
-              rows="4"
-              className="w-full px-3 py-2 mt-1 text-white bg-[#0f0f0f] border border-gray-700 rounded-md focus:outline-none focus:ring focus:ring-blue-500"
-              placeholder="A detailed description of your video..."
-              value={description}
-              disabled={uploadState.status === "uploading"}
-              onChange={(e) => setDescription(e.target.value)}
-            ></textarea>
-          </div>
-          <div>
-            <label
-              htmlFor="video"
-              className="block text-sm font-medium text-gray-300"
-            >
-              Video File
-            </label>
-            <input
-              type="file"
-              id="video"
-              accept="video/*"
-              className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-              onChange={(e) => setVideoFile(e.target.files[0])}
-              disabled={uploadState.status === "uploading"}
-              required
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="thumbnail"
-              className="block text-sm font-medium text-gray-300"
-            >
-              Thumbnail Image
-            </label>
-            <input
-              type="file"
-              id="thumbnail"
-              accept="image/*"
-              className="w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-              onChange={handleThumbnailChange}
-              disabled={uploadState.status === "uploading"}
-              required
-            />
-          </div>
+            required
+          />
+          <textarea
+            placeholder="Description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="w-full p-2 rounded bg-[#0f0f0f] border border-gray-700 text-white"
+            disabled={
+              uploadStatus === "uploading" || uploadStatus === "processing"
+            }
+          />
+          <input
+            type="file"
+            accept="video/*"
+            onChange={(e) => setVideoFile(e.target.files[0])}
+            required
+            disabled={
+              uploadStatus === "uploading" || uploadStatus === "processing"
+            }
+          />
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleThumbnailChange}
+            required
+            disabled={
+              uploadStatus === "uploading" || uploadStatus === "processing"
+            }
+          />
           {thumbnailPreview && (
-            <div className="mt-4">
-              <p className="text-sm font-medium text-gray-300">
-                Thumbnail Preview:
-              </p>
-              <img
-                src={thumbnailPreview}
-                alt="Thumbnail preview"
-                className="mt-2 rounded-lg max-h-40"
-              />
-            </div>
+            <img
+              src={thumbnailPreview}
+              alt="thumbnail"
+              className="mt-2 rounded max-h-32"
+            />
           )}
-          {/* Progress Bar and Status */}
-          {uploadState.status === "uploading" && (
-            <div className="space-y-2">
-              <div className="w-full bg-gray-700 rounded-full h-2.5">
-                <div
-                  className="bg-blue-600 h-2.5 rounded-full transition-all duration-300"
-                  style={{ width: `${uploadState.progress}%` }}
-                ></div>
-              </div>
-              <p className="text-sm text-center text-gray-300">
-                {uploadState.message}
-              </p>
-            </div>
+
+          {uploadStatus === "idle" && (
+            <button
+              type="submit"
+              className="w-full bg-blue-600 py-2 rounded text-white hover:bg-blue-700"
+            >
+              Upload
+            </button>
           )}
-          {uploadState.status === "success" && (
-            <p className="text-sm text-center font-medium text-green-500">
-              {uploadState.message}
-            </p>
+          {(uploadStatus === "error" || uploadStatus === "canceled") && (
+            <button
+              type="button"
+              onClick={handleRetryUpload}
+              className="w-full bg-blue-600 py-2 rounded text-white hover:bg-blue-700"
+            >
+              Retry
+            </button>
           )}
-          {uploadState.status === "error" && (
-            <p className="text-sm text-center font-medium text-red-500">
-              {uploadState.message}
-            </p>
-          )}
-          <button
-            type="submit"
-            className="w-full px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-500 disabled:cursor-not-allowed"
-            disabled={uploadState.status === "uploading"}
-          >
-            {uploadState.status === "uploading" ? "Uploading..." : "Upload"}
-          </button>
         </form>
       </div>
     </div>

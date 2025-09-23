@@ -3,51 +3,55 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { ThumbsUp, Share2, Download, ListPlus } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import toast from "react-hot-toast";
-import VideoCard from "../components/VideoCard";
-import * as api from "../lib/api";
-import { useUser } from "../components/UserContext";
-import { secureUrl } from "../lib/utils";
-import VideoPlayer from "../components/VideoPlayer";
 
-// Lazy load components that are not critical for the initial render
+import VideoCard from "../components/VideoCard";
+import VideoPlayer from "../components/VideoPlayer";
+import { useUser } from "../components/UserContext";
+import * as api from "../lib/api";
+import { secureUrl } from "../lib/utils";
+
+// Lazy load components
 const Comments = lazy(() => import("../components/Comments"));
 const AddToPlaylistModal = lazy(() =>
   import("../components/AddToPlaylistModal")
 );
 
+const createMasterPlaylist = (resolutions) => {
+  if (!resolutions?.length) return null;
+
+  return (
+    "#EXTM3U\n#EXT-X-VERSION:4\n" +
+    resolutions
+      .map((res) => {
+        const bandwidth = (res.bitrate || 800) * 1000;
+        return `#EXT-X-STREAM-INF:BANDWIDTH=${bandwidth},RESOLUTION=${
+          res.width
+        }x${res.height}\n${secureUrl(res.url)}`;
+      })
+      .join("\n")
+  );
+};
+
 const VideoDetailPage = () => {
   const { id } = useParams();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
-  const { user, isLoggedIn, loading: userLoading } = useUser();
-  const [viewRecorded, setViewRecorded] = useState(false);
   const navigate = useNavigate();
+  const { user, isLoggedIn, loading: userLoading } = useUser();
 
   const [video, setVideo] = useState(null);
   const [recommendedVideos, setRecommendedVideos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [viewRecorded, setViewRecorded] = useState(false);
+  const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
 
-  const handleRecordView = async () => {
-    if (!isLoggedIn || !video?._id || viewRecorded) return;
-    try {
-      await api.recordView(video._id);
-      setViewRecorded(true);
-
-      // Optimistic UI update
-      setVideo((prev) =>
-        prev ? { ...prev, views: (prev.views || 0) + 1 } : prev
-      );
-    } catch (err) {
-      console.error("Failed to record view:", err);
-    }
-  };
-
+  /** Fetch video & recommendations */
   const fetchVideoData = useCallback(async () => {
     if (!id || userLoading) return;
+
     setLoading(true);
     setError(null);
+
     try {
-      // Fetch critical data first.
       const [videoRes, allVideosRes] = await Promise.all([
         api.getVideoById(id),
         api.getAllVideos({ limit: 10 }),
@@ -57,7 +61,7 @@ const VideoDetailPage = () => {
       setRecommendedVideos(
         allVideosRes?.data?.data?.videos?.filter((v) => v._id !== id) || []
       );
-    } catch (err) {
+    } catch {
       setError("Failed to load video details.");
     } finally {
       setLoading(false);
@@ -68,103 +72,109 @@ const VideoDetailPage = () => {
     fetchVideoData();
   }, [fetchVideoData]);
 
-  // Effect to check if the video is liked by the current user
+  /** Check if video is liked */
   useEffect(() => {
+    if (!isLoggedIn || !video?._id) return;
+
     const checkLikeStatus = async () => {
-      if (isLoggedIn && video) {
-        try {
-          const likedVideosRes = await api.getLikedVideos();
-          const isLiked = likedVideosRes.data.data.some(
-            (v) => v._id === video._id
-          );
-          setVideo((prev) => (prev ? { ...prev, isLiked } : prev));
-        } catch (error) {
-          console.error("Failed to check like status", error);
-        }
+      try {
+        const likedVideosRes = await api.getLikedVideos();
+        const isLiked = likedVideosRes.data.data.some(
+          (v) => v._id === video._id
+        );
+        setVideo((prev) => (prev ? { ...prev, isLiked } : prev));
+      } catch (err) {
+        console.error("Failed to check like status", err);
       }
     };
+
     checkLikeStatus();
   }, [isLoggedIn, video?._id]);
 
-  const handleNextVideo = () => {
-    if (recommendedVideos.length > 0) {
-      navigate(`/video/${recommendedVideos[0]._id}`);
-    } else {
-      toast("No next video available.");
+  /** Record video view */
+  const handleRecordView = async () => {
+    if (!isLoggedIn || !video?._id || viewRecorded) return;
+    try {
+      await api.recordView(video._id);
+      setViewRecorded(true);
+      setVideo((prev) =>
+        prev ? { ...prev, views: (prev.views || 0) + 1 } : prev
+      );
+    } catch (err) {
+      console.error("Failed to record view:", err);
     }
   };
 
-  const handlePreviousVideo = () => {
-    toast("No previous video in this context.");
+  /** Toggle like status */
+  const handleToggleVideoLike = async () => {
+    if (!isLoggedIn)
+      return toast.error("You must be logged in to like a video.");
+
+    const originalVideo = { ...video };
+    setVideo((prev) =>
+      prev
+        ? {
+            ...prev,
+            isLiked: !prev.isLiked,
+            likesCount: (prev.likesCount || 0) + (prev.isLiked ? -1 : 1),
+          }
+        : prev
+    );
+
+    try {
+      await api.toggleVideoLike(id);
+    } catch {
+      toast.error("Failed to update like status.");
+      setVideo(originalVideo);
+    }
   };
 
+  /** Toggle subscription */
   const handleToggleSubscription = async () => {
     if (!isLoggedIn || !video?.owner?._id || user?._id === video.owner._id) {
-      toast.error("Cannot subscribe.");
-      return;
+      return toast.error("Cannot subscribe.");
     }
 
     setVideo((prev) => {
       if (!prev) return null;
       const newIsSubscribed = !prev.isSubscribed;
-      const newSubscribersCount = newIsSubscribed
-        ? prev.owner.subscribersCount + 1
-        : prev.owner.subscribersCount - 1;
       return {
         ...prev,
         isSubscribed: newIsSubscribed,
-        owner: { ...prev.owner, subscribersCount: newSubscribersCount },
+        owner: {
+          ...prev.owner,
+          subscribersCount:
+            prev.owner.subscribersCount + (newIsSubscribed ? 1 : -1),
+        },
       };
     });
 
     try {
       await api.toggleSubscription(video.owner._id);
     } catch (err) {
-      console.error(err);
       toast.error("Failed to toggle subscription");
-      // Revert UI on failure
-      setVideo((prev) => {
-        if (!prev) return null;
-        const newIsSubscribed = !prev.isSubscribed;
-        const newSubscribersCount = newIsSubscribed
-          ? prev.owner.subscribersCount + 1
-          : prev.owner.subscribersCount - 1;
-        return {
-          ...prev,
-          isSubscribed: newIsSubscribed,
-          owner: { ...prev.owner, subscribersCount: newSubscribersCount },
-        };
-      });
+      setVideo((prev) =>
+        prev
+          ? {
+              ...prev,
+              isSubscribed: !prev.isSubscribed,
+              owner: {
+                ...prev.owner,
+                subscribersCount:
+                  prev.owner.subscribersCount + (prev.isSubscribed ? 1 : -1),
+              },
+            }
+          : prev
+      );
     }
   };
 
-  const handleToggleVideoLike = async () => {
-    if (!isLoggedIn) {
-      toast.error("You must be logged in to like a video.");
-      return;
-    }
-
-    const originalVideo = { ...video };
-
-    // Optimistic UI update
-    setVideo((prev) => {
-      if (!prev) return null;
-      const newIsLiked = !prev.isLiked;
-      const currentLikes = prev.likesCount || 0;
-      const newLikesCount = newIsLiked ? currentLikes + 1 : currentLikes - 1;
-      return { ...prev, isLiked: newIsLiked, likesCount: newLikesCount };
-    });
-
-    try {
-      await api.toggleVideoLike(id);
-      // Optimistic update is sufficient since the API does not return the new count.
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to update like status.");
-      // Revert UI on failure
-      setVideo(originalVideo);
-    }
+  const handleNextVideo = () => {
+    if (!recommendedVideos.length) return toast("No next video available.");
+    navigate(`/video/${recommendedVideos[0]._id}`);
   };
+
+  const handlePreviousVideo = () => toast("No previous video in this context.");
 
   if (loading) return <div className="p-6 text-center">Loading...</div>;
   if (error) return <div className="p-6 text-center text-red-500">{error}</div>;
@@ -179,10 +189,19 @@ const VideoDetailPage = () => {
         <meta property="og:description" content={video.description} />
         <meta property="og:image" content={secureUrl(video.thumbnail?.url)} />
       </Helmet>
+
       <div className="w-full lg:flex-1 min-w-0">
         <div className="aspect-video bg-black rounded-xl mb-4 overflow-hidden">
           <VideoPlayer
-            src={secureUrl(video.videoFile?.url || video.videoFile)}
+            src={
+              video.videoFile?.adaptive?.length > 0
+                ? {
+                    masterPlaylist: createMasterPlaylist(
+                      video.videoFile.adaptive
+                    ),
+                  }
+                : secureUrl(video.videoFile?.url || video.videoFile)
+            }
             poster={secureUrl(video.thumbnail?.url)}
             onPlay={handleRecordView}
             onNext={handleNextVideo}
@@ -280,6 +299,7 @@ const VideoDetailPage = () => {
           ))}
         </div>
       </div>
+
       {isPlaylistModalOpen && (
         <Suspense fallback={<div />}>
           <AddToPlaylistModal

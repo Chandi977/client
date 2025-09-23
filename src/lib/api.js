@@ -62,8 +62,8 @@ export const getUnpublishedVideos = () => api.get("/videos/unpublished/all");
 export const getTrendingVideos = () => api.get("/videos/trending/top");
 
 // Protected
-export const publishVideo = (formData, options) =>
-  api.post("/videos/upload", formData, options);
+export const publishVideo = (formData, config) =>
+  api.post("/videos/upload", formData, config);
 export const updateVideo = (videoId, data) =>
   api.patch(`/videos/${videoId}`, data);
 export const deleteVideo = (videoId) => api.delete(`/videos/${videoId}`);

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Hls from "hls.js";
 import {
   Play,
@@ -10,10 +10,12 @@ import {
   SkipForward,
   SkipBack,
   Settings,
+  ChevronLeft,
   Check,
 } from "lucide-react";
 
 const LAZY_LOAD_OFFSET = "200px";
+
 const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
   const videoRef = useRef(null);
   const playerContainerRef = useRef(null);
@@ -29,17 +31,17 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
+  const [settingsMenu, setSettingsMenu] = useState("main"); // 'main', 'quality', 'speed'
 
   const [qualities, setQualities] = useState([]);
   const [currentQuality, setCurrentQuality] = useState(-1); // -1 for auto
-
+  const [playingQuality, setPlayingQuality] = useState(-1); // The actual playing level index
   const [shouldLoad, setShouldLoad] = useState(false);
+  const [isSwitchingQuality, setIsSwitchingQuality] = useState(false);
 
   const onIntersection = useCallback((entries) => {
     const [entry] = entries;
-    if (entry.isIntersecting) {
-      setShouldLoad(true);
-    }
+    if (entry.isIntersecting) setShouldLoad(true);
   }, []);
 
   useEffect(() => {
@@ -47,42 +49,63 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
       rootMargin: LAZY_LOAD_OFFSET,
     });
     const currentRef = playerContainerRef.current;
-    if (currentRef) {
-      observer.observe(currentRef);
-    }
+    if (currentRef) observer.observe(currentRef);
     return () => {
-      if (currentRef) {
-        observer.unobserve(currentRef);
-      }
+      if (currentRef) observer.unobserve(currentRef);
     };
   }, [onIntersection]);
 
-  // HLS setup and player event listeners
+  // HLS setup
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !shouldLoad) return;
+    if (!video || !shouldLoad || !src) return;
 
-    const setupHls = () => {
+    let blobUrl = null;
+
+    const setupHls = (sourceUrl) => {
       if (Hls.isSupported()) {
-        const hls = new Hls();
+        const hls = new Hls({ capLevelToPlayerSize: true });
         hlsRef.current = hls;
-        hls.loadSource(src);
+        hls.loadSource(sourceUrl);
         hls.attachMedia(video);
+
         hls.on(Hls.Events.MANIFEST_PARSED, (_, data) => {
-          setQualities(data.levels);
+          const allLevels = data.levels.map((level, index) => {
+            return {
+              index,
+              height: level.height || 0,
+              name: level.name || `${Math.round(level.bitrate / 1000)} kbps`,
+            };
+          });
+
+          setQualities(allLevels);
           setCurrentQuality(-1); // Auto
+          setPlayingQuality(hls.currentLevel);
         });
+
         hls.on(Hls.Events.LEVEL_SWITCHED, (_, data) => {
-          setCurrentQuality(data.level);
+          setPlayingQuality(data.level);
+          setIsSwitchingQuality(false);
+        });
+        hls.on(Hls.Events.LEVEL_SWITCHING, () => {
+          setIsSwitchingQuality(true);
         });
       } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-        video.src = src;
+        video.src = sourceUrl;
       }
     };
 
-    if (src) {
-      if (src.endsWith(".m3u8")) setupHls();
+    if (typeof src === "object" && src.masterPlaylist) {
+      const blob = new Blob([src.masterPlaylist], {
+        type: "application/vnd.apple.mpegurl",
+      });
+      blobUrl = URL.createObjectURL(blob);
+      setupHls(blobUrl);
+    } else if (typeof src === "string") {
+      if (src.endsWith(".m3u8")) setupHls(src);
       else video.src = src;
+    } else {
+      video.src = "";
     }
 
     const handlePlay = () => setIsPlaying(true);
@@ -94,10 +117,14 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
     video.addEventListener("pause", handlePause);
     video.addEventListener("timeupdate", handleTimeUpdate);
     video.addEventListener("durationchange", handleDurationChange);
-    video.addEventListener("play", onPlay);
+    if (onPlay) video.addEventListener("play", onPlay);
 
     return () => {
-      if (hlsRef.current) hlsRef.current.destroy();
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+      if (blobUrl) URL.revokeObjectURL(blobUrl);
       video.removeEventListener("play", handlePlay);
       video.removeEventListener("pause", handlePause);
       video.removeEventListener("timeupdate", handleTimeUpdate);
@@ -109,8 +136,7 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")
-        return;
+      if (["INPUT", "TEXTAREA"].includes(e.target.tagName)) return;
       switch (e.key.toLowerCase()) {
         case " ":
         case "k":
@@ -155,15 +181,13 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
   const handleSpeedChange = (rate) => {
     videoRef.current.playbackRate = rate;
     setPlaybackRate(rate);
-    setShowSettings(false);
+    setSettingsMenu("main");
   };
 
   const handleQualityChange = (levelIndex) => {
-    if (hlsRef.current) {
-      hlsRef.current.currentLevel = levelIndex;
-    }
+    if (hlsRef.current) hlsRef.current.nextLevel = levelIndex;
     setCurrentQuality(levelIndex);
-    setShowSettings(false);
+    setSettingsMenu("main");
   };
 
   const toggleFullScreen = () => {
@@ -181,6 +205,26 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds.toString().padStart(2, "0")}`;
   };
+
+  const currentQualityLabel = useMemo(() => {
+    if (currentQuality === -1) {
+      const level = qualities.find((q) => q.index === playingQuality);
+      if (level) {
+        return `Auto (${level.height > 0 ? `${level.height}p` : level.name})`;
+      }
+      return "Auto";
+    }
+    const level = qualities.find((q) => q.index === currentQuality);
+    return level
+      ? level.height > 0
+        ? `${level.height}p`
+        : level.name
+      : "Auto";
+  }, [currentQuality, playingQuality, qualities]);
+
+  const sortedQualities = useMemo(() => {
+    return [...qualities].sort((a, b) => b.height - a.height);
+  }, [qualities]);
 
   return (
     <div
@@ -204,13 +248,17 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
         playsInline
         preload="metadata"
       />
+      {isSwitchingQuality && (
+        <div className="absolute inset-0 bg-black/50 flex justify-center items-center z-10">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
+        </div>
+      )}
 
       <div
         className={`absolute inset-0 bg-black/20 transition-opacity duration-300 ${
           showControls || !isPlaying ? "opacity-100" : "opacity-0"
         }`}
       >
-        {/* Controls */}
         <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent">
           {/* Timeline */}
           <input
@@ -256,54 +304,114 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
             <div className="flex items-center gap-4">
               <div className="relative">
                 <button
-                  onClick={() => setShowSettings(!showSettings)}
+                  onClick={() => {
+                    setShowSettings(!showSettings);
+                    setSettingsMenu("main");
+                  }}
                   title="Settings"
                 >
                   <Settings />
                 </button>
                 {showSettings && (
-                  <div className="absolute bottom-full right-0 mb-2 bg-black/80 backdrop-blur-sm rounded-md p-2 min-w-[150px]">
-                    {/* Playback Speed */}
-                    <div className="mb-2">
-                      <h4 className="text-sm font-semibold mb-1">Speed</h4>
-                      {[0.5, 1, 1.5, 2].map((rate) => (
-                        <button
-                          key={rate}
-                          onClick={() => handleSpeedChange(rate)}
-                          className={`w-full text-left text-sm p-1 rounded hover:bg-gray-700 flex justify-between ${
-                            playbackRate === rate ? "text-blue-400" : ""
-                          }`}
-                        >
-                          {rate === 1 ? "Normal" : `${rate}x`}
-                          {playbackRate === rate && <Check size={16} />}
-                        </button>
-                      ))}
-                    </div>
-                    {/* Quality Selection */}
-                    {qualities.length > 0 && (
+                  <div className="absolute bottom-full right-0 mb-2 bg-black/80 backdrop-blur-sm rounded-md p-2 min-w-[220px]">
+                    {settingsMenu === "main" && (
                       <div>
-                        <h4 className="text-sm font-semibold mb-1">Quality</h4>
+                        {qualities.length > 0 && (
+                          <button
+                            onClick={() => setSettingsMenu("quality")}
+                            className="w-full flex justify-between items-center p-2 hover:bg-gray-700 rounded"
+                          >
+                            <span>Quality</span>
+                            <span className="text-gray-400">
+                              {currentQualityLabel} &gt;
+                            </span>
+                          </button>
+                        )}
+                        <button
+                          onClick={() => setSettingsMenu("speed")}
+                          className="w-full flex justify-between items-center p-2 hover:bg-gray-700 rounded"
+                        >
+                          <span>Playback speed</span>
+                          <span className="text-gray-400">
+                            {playbackRate === 1 ? "Normal" : `${playbackRate}x`}{" "}
+                            &gt;
+                          </span>
+                        </button>
+                      </div>
+                    )}
+                    {settingsMenu === "quality" && (
+                      <div>
+                        <div className="flex items-center">
+                          <button
+                            onClick={() => setSettingsMenu("main")}
+                            className="p-2 hover:bg-gray-700 rounded-full"
+                          >
+                            <ChevronLeft size={18} />
+                          </button>
+                          <h4 className="text-sm font-semibold ml-2">
+                            Quality
+                          </h4>
+                        </div>
+                        <div className="border-t border-gray-600 my-1"></div>
                         <button
                           onClick={() => handleQualityChange(-1)}
-                          className={`w-full text-left text-sm p-1 rounded hover:bg-gray-700 flex justify-between ${
+                          className={`w-full text-left text-sm p-2 rounded hover:bg-gray-700 flex justify-between items-center ${
                             currentQuality === -1 ? "text-blue-400" : ""
                           }`}
                         >
-                          Auto
+                          <span>Auto</span>
                           {currentQuality === -1 && <Check size={16} />}
                         </button>
-                        {qualities.map((level, index) => (
+                        {sortedQualities.map((level) => (
                           <button
-                            key={index}
-                            onClick={() => handleQualityChange(index)}
-                            className={`w-full text-left text-sm p-1 rounded hover:bg-gray-700 flex justify-between ${
-                              currentQuality === index ? "text-blue-400" : ""
+                            key={level.index}
+                            onClick={() => handleQualityChange(level.index)}
+                            className={`w-full text-left text-sm p-2 rounded hover:bg-gray-700 flex justify-between items-center ${
+                              currentQuality === level.index
+                                ? "text-blue-400"
+                                : ""
                             }`}
                           >
-                            {level.height}p
-                            {currentQuality === index && <Check size={16} />}
+                            <span>
+                              {level.height > 0
+                                ? `${level.height}p`
+                                : level.name}
+                            </span>
+                            {currentQuality === level.index && (
+                              <Check size={16} />
+                            )}
                           </button>
                         ))}
+                      </div>
+                    )}
+                    {settingsMenu === "speed" && (
+                      <div>
+                        <div className="flex items-center">
+                          <button
+                            onClick={() => setSettingsMenu("main")}
+                            className="p-2 hover:bg-gray-700 rounded-full"
+                          >
+                            <ChevronLeft size={18} />
+                          </button>
+                          <h4 className="text-sm font-semibold ml-2">
+                            Playback speed
+                          </h4>
+                        </div>
+                        <div className="border-t border-gray-600 my-1"></div>
+                        {[0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].map(
+                          (rate) => (
+                            <button
+                              key={rate}
+                              onClick={() => handleSpeedChange(rate)}
+                              className={`w-full text-left text-sm p-2 rounded hover:bg-gray-700 flex justify-between items-center ${
+                                playbackRate === rate ? "text-blue-400" : ""
+                              }`}
+                            >
+                              <span>{rate === 1 ? "Normal" : `${rate}x`}</span>
+                              {playbackRate === rate && <Check size={16} />}
+                            </button>
+                          )
+                        )}
                       </div>
                     )}
                   </div>
