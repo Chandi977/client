@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { registerUser } from "./lib/api";
+import { registerUser } from "../lib/api";
 import toast from "react-hot-toast";
-import { useOAuth } from "./hooks/useOAuth";
+import { useOAuth } from "../hooks/useOAuth";
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({

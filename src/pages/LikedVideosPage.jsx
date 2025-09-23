@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { getLikedVideos } from "./lib/api";
-import VideoCard from "./components/VideoCard";
-import { useUser } from "./components/UserContext";
+import { getLikedVideos } from "../lib/api";
+import VideoCard from "../components/VideoCard";
+import { useUser } from "../components/UserContext";
 
 const LikedVideosPage = () => {
   const [videos, setVideos] = useState([]);

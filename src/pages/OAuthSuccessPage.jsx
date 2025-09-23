@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useUser } from "./components/UserContext";
+import { useUser } from "../components/UserContext";
 import Cookies from "js-cookie";
 
 const OAuthSuccessPage = () => {

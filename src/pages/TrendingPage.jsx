@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { getTrendingVideos } from "./lib/api";
-import VideoCard from "./components/VideoCard";
-import { useUser } from "./components/UserContext";
+import { getTrendingVideos } from "../lib/api";
+import VideoCard from "../components/VideoCard";
+import { useUser } from "../components/UserContext";
 
 const TrendingPage = () => {
   const [videos, setVideos] = useState([]);

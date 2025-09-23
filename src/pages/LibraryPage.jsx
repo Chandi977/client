@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { getUserPlaylists, getVideoById } from "./lib/api";
-import { useUser } from "./components/UserContext";
-import CreatePlaylistForm from "./components/CreatePlaylistForm";
+import { getUserPlaylists, getVideoById } from "../lib/api";
+import { useUser } from "../components/UserContext";
+import CreatePlaylistForm from "../components/CreatePlaylistForm";
 import { ListVideo, ThumbsUp, History, Users } from "lucide-react";
 
 const LibraryPage = () => {

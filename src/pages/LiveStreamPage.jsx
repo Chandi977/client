@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { getLiveStreams } from "./lib/api";
+import { getLiveStreams } from "../lib/api";
 import { Helmet } from "react-helmet-async";
-import { secureUrl } from "./lib/utils";
+import { secureUrl } from "../lib/utils";
 
 const LiveStreamPage = () => {
   const [streams, setStreams] = useState([]);

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { publishVideo } from "./lib/api";
+import { publishVideo } from "../lib/api";
 
 const UploadPage = () => {
   const [title, setTitle] = useState("");

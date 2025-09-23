@@ -4,12 +4,12 @@ import {
   getPlaylistById,
   removeVideoFromPlaylist,
   getVideoById,
-} from "./lib/api";
-import VideoCard from "./components/VideoCard";
-import { useUser } from "./components/UserContext";
+} from "../lib/api";
+import VideoCard from "../components/VideoCard";
+import { useUser } from "../components/UserContext";
 import { Trash2, PlusCircle } from "lucide-react";
 import toast from "react-hot-toast";
-import AddVideosToPlaylistModal from "./components/AddVideosToPlaylistModal";
+import AddVideosToPlaylistModal from "../components/AddVideosToPlaylistModal";
 
 const PlaylistDetailPage = () => {
   const { playlistId } = useParams();

@@ -3,16 +3,16 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { ThumbsUp, Share2, Download, ListPlus } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 import toast from "react-hot-toast";
-import VideoCard from "./components/VideoCard";
-import * as api from "./lib/api";
-import { useUser } from "./components/UserContext";
-import { secureUrl } from "./lib/utils";
-import VideoPlayer from "./components/VideoPlayer";
+import VideoCard from "../components/VideoCard";
+import * as api from "../lib/api";
+import { useUser } from "../components/UserContext";
+import { secureUrl } from "../lib/utils";
+import VideoPlayer from "../components/VideoPlayer";
 
 // Lazy load components that are not critical for the initial render
-const Comments = lazy(() => import("./components/Comments"));
+const Comments = lazy(() => import("../components/Comments"));
 const AddToPlaylistModal = lazy(() =>
-  import("./components/AddToPlaylistModal")
+  import("../components/AddToPlaylistModal")
 );
 
 const VideoDetailPage = () => {

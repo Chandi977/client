@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { loginUser } from "./lib/api";
-import { useUser } from "./components/UserContext";
+import { loginUser } from "../lib/api";
+import { useUser } from "../components/UserContext";
 import toast from "react-hot-toast";
 import Cookies from "js-cookie"; // Import js-cookie
-import { useOAuth } from "./hooks/useOAuth";
+import { useOAuth } from "../hooks/useOAuth";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");

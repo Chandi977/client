@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { searchVideos } from "./lib/api";
-import VideoCard from "./components/VideoCard";
-import { useUser } from "./components/UserContext";
+import { searchVideos } from "../lib/api";
+import VideoCard from "../components/VideoCard";
+import { useUser } from "../components/UserContext";
 
 const SearchResultsPage = () => {
   const [searchParams] = useSearchParams();

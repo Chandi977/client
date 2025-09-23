@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import toast from "react-hot-toast";
-import { getLiveStream } from "./lib/api";
-import { useUser } from "./components/UserContext";
-import { secureUrl } from "./lib/utils";
-import VideoPlayer from "./components/VideoPlayer";
+import { getLiveStream } from "../lib/api";
+import { useUser } from "../components/UserContext";
+import { secureUrl } from "../lib/utils";
+import VideoPlayer from "../components/VideoPlayer";
 
 const LiveStreamViewerPage = () => {
   const { streamId } = useParams();

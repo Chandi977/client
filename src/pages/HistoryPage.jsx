@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { getWatchHistory } from "./lib/api";
-import VideoCard from "./components/VideoCard";
-import { useUser } from "./components/UserContext";
+import { getWatchHistory } from "../lib/api";
+import VideoCard from "../components/VideoCard";
+import { useUser } from "../components/UserContext";
 
 const HistoryPage = () => {
   const [videos, setVideos] = useState([]);

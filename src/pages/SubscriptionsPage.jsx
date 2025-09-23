@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { getSubscribedChannels } from "./lib/api";
-import { useUser } from "./components/UserContext";
+import { getSubscribedChannels } from "../lib/api";
+import { useUser } from "../components/UserContext";
 
 const SubscriptionsPage = () => {
   const { user } = useUser();
