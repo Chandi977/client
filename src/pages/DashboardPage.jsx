@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { getChannelStats, getChannelVideos } from "./lib/api";
-import VideoCard from "./components/VideoCard";
+import { getChannelStats, getChannelVideos } from "../lib/api";
+import VideoCard from "../components/VideoCard";
 import { Video, Users, ThumbsUp, Eye } from "lucide-react";
-import { useUser } from "./components/UserContext";
+import { useUser } from "../components/UserContext";
 
 const DashboardPage = () => {
   const [stats, setStats] = useState(null);

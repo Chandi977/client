@@ -6,11 +6,11 @@ import {
   getUserChannelProfile,
   getUserVideos,
   toggleSubscription,
-} from "./lib/api";
-import { useUser } from "./components/UserContext";
-import { secureUrl } from "./lib/utils";
-import VideoCard from "./components/VideoCard";
-import CommunityTab from "./components/CommunityTab";
+} from "../lib/api";
+import { useUser } from "../components/UserContext";
+import { secureUrl } from "../lib/utils";
+import VideoCard from "../components/VideoCard";
+import CommunityTab from "../components/CommunityTab";
 
 const ChannelPage = () => {
   const { username } = useParams();

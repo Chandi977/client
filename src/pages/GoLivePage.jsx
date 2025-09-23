@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
 import { Helmet } from "react-helmet-async";
-import { createLiveStream } from "./lib/api";
+import { createLiveStream } from "../lib/api";
 
 const categories = ["Gaming", "Music", "Education", "Sports", "Entertainment"];
 

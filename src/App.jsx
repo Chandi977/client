@@ -8,24 +8,24 @@ import Sidebar from "./components/Sidebar";
 
 // Lazy load page components for better performance
 const VideoGrid = lazy(() => import("./components/VideoGrid"));
-const LoginPage = lazy(() => import("./LoginPage"));
-const RegisterPage = lazy(() => import("./RegisterPage"));
-const VideoDetailPage = lazy(() => import("./VideoDetailPage"));
-const LikedVideosPage = lazy(() => import("./LikedVideosPage"));
-const HistoryPage = lazy(() => import("./HistoryPage"));
-const SearchResultsPage = lazy(() => import("./SearchResultsPage"));
-const ChannelPage = lazy(() => import("./ChannelPage"));
-const DashboardPage = lazy(() => import("./DashboardPage"));
-const LibraryPage = lazy(() => import("./LibraryPage"));
-const PlaylistDetailPage = lazy(() => import("./PlaylistDetailPage"));
-const SubscriptionsPage = lazy(() => import("./SubscriptionsPage"));
-const TrendingPage = lazy(() => import("./TrendingPage"));
-const OAuthSuccessPage = lazy(() => import("./OAuthSuccessPage"));
-const UploadPage = lazy(() => import("./UploadPage"));
-const LiveStreamPage = lazy(() => import("./LiveStreamPage"));
-const GoLivePage = lazy(() => import("./GoLivePage"));
-const LiveStreamViewerPage = lazy(() => import("./LiveStreamViewerPage"));
-const HealthCheckPage = lazy(() => import("./HealthCheckPage"));
+const LoginPage = lazy(() => import("./pages/LoginPage"));
+const RegisterPage = lazy(() => import("./pages/RegisterPage"));
+const VideoDetailPage = lazy(() => import("./pages/VideoDetailPage"));
+const LikedVideosPage = lazy(() => import("./pages/LikedVideosPage"));
+const HistoryPage = lazy(() => import("./pages/HistoryPage"));
+const SearchResultsPage = lazy(() => import("./pages/SearchResultsPage"));
+const ChannelPage = lazy(() => import("./pages/ChannelPage"));
+const DashboardPage = lazy(() => import("./pages/DashboardPage"));
+const LibraryPage = lazy(() => import("./pages/LibraryPage"));
+const PlaylistDetailPage = lazy(() => import("./pages/PlaylistDetailPage"));
+const SubscriptionsPage = lazy(() => import("./pages/SubscriptionsPage"));
+const TrendingPage = lazy(() => import("./pages/TrendingPage"));
+const OAuthSuccessPage = lazy(() => import("./pages/OAuthSuccessPage"));
+const UploadPage = lazy(() => import("./pages/UploadPage"));
+const LiveStreamPage = lazy(() => import("./pages/LiveStreamPage"));
+const GoLivePage = lazy(() => import("./pages/GoLivePage"));
+const LiveStreamViewerPage = lazy(() => import("./pages/LiveStreamViewerPage"));
+const HealthCheckPage = lazy(() => import("./pages/HealthCheckPage"));
 
 const SuspenseFallback = () => (
   <div className="flex-1 p-6 text-center">Loading page...</div>
@@ -90,7 +90,10 @@ function App() {
                   element={<PlaylistDetailPage />}
                 />
                 <Route path="/go-live" element={<GoLivePage />} />
-                <Route path="/live/:streamId" element={<LiveStreamViewerPage />} />
+                <Route
+                  path="/live/:streamId"
+                  element={<LiveStreamViewerPage />}
+                />
                 <Route path="/live" element={<LiveStreamPage />} />
                 <Route path="/healthcheck" element={<HealthCheckPage />} />
                 <Route path="/subscriptions" element={<SubscriptionsPage />} />

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet-async";
-import { healthCheck } from "./lib/api";
+import { healthCheck } from "../lib/api";
 
 const HealthCheckPage = () => {
   const [status, setStatus] = useState("loading");
