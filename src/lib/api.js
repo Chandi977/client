@@ -70,6 +70,11 @@ export const deleteVideo = (videoId) => api.delete(`/videos/${videoId}`);
 export const togglePublishStatus = (videoId) =>
   api.patch(`/videos/toggle/publish/${videoId}`);
 
+// ================= JOBS APIs (for uploads) =================
+export const getJobStatus = (jobId) => api.get(`/jobs/${jobId}`);
+export const cancelVideoUpload = (jobId) =>
+  api.delete(`/jobs/${jobId}/cancel`);
+
 // ================= PLAYLIST APIs =================
 export const createPlaylist = (data) => api.post("/playlist", data);
 export const getPlaylistById = (playlistId) =>

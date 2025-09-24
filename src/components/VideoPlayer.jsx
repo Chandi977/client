@@ -59,6 +59,7 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !shouldLoad || !src) return;
+    // console.log("VideoPlayer: src prop received", src);
 
     let blobUrl = null;
 
@@ -69,6 +70,11 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
         hls.loadSource(sourceUrl);
         hls.attachMedia(video);
 
+        hls.on(Hls.Events.ERROR, function (event, data) {
+          console.error("HLS.js Error:", data);
+          // You could add logic here to try and recover from the error
+        });
+
         hls.on(Hls.Events.MANIFEST_PARSED, (_, data) => {
           const allLevels = data.levels.map((level, index) => {
             return {
@@ -78,6 +84,10 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
             };
           });
 
+          // console.log(
+          //   "HLS.js: Manifest parsed, qualities available:",
+          //   allLevels
+          // );
           setQualities(allLevels);
           setCurrentQuality(-1); // Auto
           setPlayingQuality(hls.currentLevel);
@@ -96,16 +106,19 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
     };
 
     if (typeof src === "object" && src.masterPlaylist) {
-      const blob = new Blob([src.masterPlaylist], {
+      // Check for non-empty masterPlaylist
+      const blob = new Blob([src.masterPlaylist || ""], {
+        // Ensure content is a string, even if masterPlaylist is null/undefined
         type: "application/vnd.apple.mpegurl",
       });
       blobUrl = URL.createObjectURL(blob);
+      // console.log("VideoPlayer: Created blob URL:", blobUrl);
       setupHls(blobUrl);
     } else if (typeof src === "string") {
       if (src.endsWith(".m3u8")) setupHls(src);
-      else video.src = src;
+      else video.src = src || ""; // Ensure src is an empty string if it's falsy
     } else {
-      video.src = "";
+      video.src = ""; // Already handles falsy src
     }
 
     const handlePlay = () => setIsPlaying(true);
@@ -225,6 +238,7 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
   const sortedQualities = useMemo(() => {
     return [...qualities].sort((a, b) => b.height - a.height);
   }, [qualities]);
+  // console.log("Video adaptive streams:", video.videoFile.adaptive);
 
   return (
     <div

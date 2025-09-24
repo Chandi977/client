@@ -17,7 +17,7 @@ const VideoGrid = () => {
         setVideos(response.data.data.videos || []);
       } catch (err) {
         setError("Failed to fetch videos. Make sure your backend is running.");
-        console.error(err);
+        // console.error(err);
       } finally {
         setLoading(false);
       }

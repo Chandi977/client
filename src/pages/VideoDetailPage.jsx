@@ -19,17 +19,35 @@ const AddToPlaylistModal = lazy(() =>
 const createMasterPlaylist = (resolutions) => {
   if (!resolutions?.length) return null;
 
-  return (
+  // Map heights to approximate bitrates (in kbps) for a better player experience
+  const bitrateMap = {
+    144: 200,
+    240: 400,
+    360: 800,
+    480: 1500,
+    720: 2800,
+    1080: 5000,
+  };
+
+  // Sort resolutions by height. HLS players often prefer this.
+  const sortedResolutions = [...resolutions].sort(
+    (a, b) => a.height - b.height
+  );
+
+  const playlist =
     "#EXTM3U\n#EXT-X-VERSION:4\n" +
-    resolutions
+    sortedResolutions
       .map((res) => {
-        const bandwidth = (res.bitrate || 800) * 1000;
+        const bitrate = bitrateMap[res.height] || 800;
+        const bandwidth = bitrate * 1000;
         return `#EXT-X-STREAM-INF:BANDWIDTH=${bandwidth},RESOLUTION=${
           res.width
         }x${res.height}\n${secureUrl(res.url)}`;
       })
-      .join("\n")
-  );
+      .join("\n");
+
+  console.log("Generated Master Playlist:\n", playlist);
+  return playlist;
 };
 
 const VideoDetailPage = () => {
@@ -57,7 +75,9 @@ const VideoDetailPage = () => {
         api.getAllVideos({ limit: 10 }),
       ]);
 
-      setVideo(videoRes?.data?.data || null);
+      const fetchedVideo = videoRes?.data?.data || null;
+      // console.log("Fetched video data in VideoDetailPage:", fetchedVideo);
+      setVideo(fetchedVideo);
       setRecommendedVideos(
         allVideosRes?.data?.data?.videos?.filter((v) => v._id !== id) || []
       );
@@ -192,21 +212,23 @@ const VideoDetailPage = () => {
 
       <div className="w-full lg:flex-1 min-w-0">
         <div className="aspect-video bg-black rounded-xl mb-4 overflow-hidden">
-          <VideoPlayer
-            src={
-              video.videoFile?.adaptive?.length > 0
-                ? {
-                    masterPlaylist: createMasterPlaylist(
-                      video.videoFile.adaptive
-                    ),
-                  }
-                : secureUrl(video.videoFile?.url || video.videoFile)
-            }
-            poster={secureUrl(video.thumbnail?.url)}
-            onPlay={handleRecordView}
-            onNext={handleNextVideo}
-            onPrevious={handlePreviousVideo}
-          />
+          <Suspense fallback={<div className="w-full h-full bg-black" />}>
+            <VideoPlayer
+              src={
+                video.videoFile?.adaptive?.length > 0
+                  ? {
+                      masterPlaylist: createMasterPlaylist(
+                        video.videoFile.adaptive
+                      ),
+                    }
+                  : secureUrl(video.videoFile?.url || video.videoFile)
+              }
+              poster={secureUrl(video.thumbnail?.url)}
+              onPlay={handleRecordView}
+              onNext={handleNextVideo}
+              onPrevious={handlePreviousVideo}
+            />
+          </Suspense>
         </div>
 
         <h1 className="text-2xl font-bold mb-2">{video.title}</h1>
