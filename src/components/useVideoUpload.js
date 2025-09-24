@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
+import axios from "axios";
 import { publishVideo, cancelVideoUpload, getJobStatus } from "../lib/api";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
@@ -158,16 +159,20 @@ export const useVideoUpload = (userId) => {
         isCancelled: false,
       });
 
-      const { xhr, promise } = publishVideo(formData, (e) => {
-        if (e.lengthComputable) {
-          const percent = Math.floor((e.loaded * 100) / e.total);
-          setUploadState((prev) => ({ ...prev, progress: percent }));
-        }
-      });
-      xhrRef.current = xhr;
+      const source = axios.CancelToken.source();
+      xhrRef.current = source;
 
       try {
-        const response = await promise;
+        const response = await publishVideo(formData, {
+          onUploadProgress: (e) => {
+            if (e.lengthComputable) {
+              const percent = Math.floor((e.loaded * 100) / e.total);
+              setUploadState((prev) => ({ ...prev, progress: percent }));
+            }
+          },
+          cancelToken: source.token,
+        });
+
         const { jobId, message } = response.data.data;
 
         setUploadState((prev) => ({
@@ -184,6 +189,10 @@ export const useVideoUpload = (userId) => {
           if (!socketRef.current?.connected) startPolling(jobId);
         }, 2000);
       } catch (error) {
+        if (axios.isCancel(error)) {
+          // This is handled by the cancelUpload function, so we can just return.
+          return;
+        }
         const errorMessage =
           error.response?.data?.message || error.message || "Upload failed";
         toast.error(errorMessage);
@@ -197,12 +206,12 @@ export const useVideoUpload = (userId) => {
         }));
       }
     },
-    [publishVideo]
+    [startPolling]
   );
 
   const cancelUpload = useCallback(async () => {
-    if (xhrRef.current) {
-      xhrRef.current.abort();
+    if (xhrRef.current?.cancel) {
+      xhrRef.current.cancel("Upload cancelled by user.");
     }
     if (uploadState.jobId) {
       try {
@@ -219,7 +228,7 @@ export const useVideoUpload = (userId) => {
       stage: "cancelled",
       message: "Upload cancelled",
     }));
-  }, [uploadState.jobId, cancelVideoUpload]);
+  }, [uploadState.jobId]);
 
   const resetUpload = useCallback(() => {
     setUploadState({
