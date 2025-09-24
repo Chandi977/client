@@ -201,7 +201,7 @@ const VideoDetailPage = () => {
   if (!video) return <div className="p-6 text-center">Video not found.</div>;
 
   return (
-    <div className="flex flex-col lg:flex-row p-4 md:p-6 gap-6">
+    <div className="flex flex-col lg:flex-row p-4 md:p-6 gap-6 min-h-[calc(100vh-3.5rem)]">
       <Helmet>
         <title>{`${video.title} - YoutubeClone`}</title>
         <meta name="description" content={video.description} />
@@ -231,7 +231,7 @@ const VideoDetailPage = () => {
           </Suspense>
         </div>
 
-        <h1 className="text-2xl font-bold mb-2">{video.title}</h1>
+        <h1 className="text-xl md:text-2xl font-bold mb-2">{video.title}</h1>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <Link
@@ -262,7 +262,7 @@ const VideoDetailPage = () => {
             </button>
           </div>
 
-          <div className="flex gap-2 flex-wrap justify-start sm:justify-end">
+          <div className="flex gap-2 flex-wrap">
             <button
               onClick={handleToggleVideoLike}
               className={`flex items-center gap-2 bg-gray-800 px-4 py-2 rounded-full hover:bg-gray-700 ${

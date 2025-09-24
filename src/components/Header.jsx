@@ -55,7 +55,7 @@ const Header = ({ onMenuClick }) => {
       </div>
 
       {/* Center Section */}
-      <div className="flex-1 flex justify-center px-4 lg:px-16">
+      <div className="hidden sm:flex flex-1 justify-center px-4 lg:px-16">
         <form onSubmit={handleSearch} className="w-full max-w-2xl flex">
           <input
             type="text"
@@ -75,7 +75,15 @@ const Header = ({ onMenuClick }) => {
       </div>
 
       {/* Right Section */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 sm:gap-2">
+        {/* Search Icon for mobile */}
+        <button
+          aria-label="Search"
+          className="sm:hidden p-2 rounded-full hover:bg-gray-800"
+          onClick={() => navigate("/results")}
+        >
+          <Search size={22} />
+        </button>
         <Link to="/upload">
           <button
             aria-label="Upload video"

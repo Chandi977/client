@@ -70,7 +70,7 @@ function App() {
               onClick={toggleSidebar}
             ></div>
           )}
-          <main className="flex-1 overflow-y-auto z-10">
+          <main className="flex-1 overflow-y-auto z-10 w-full">
             <Suspense fallback={<SuspenseFallback />}>
               <Routes>
                 <Route path="/" element={<VideoGrid />} />

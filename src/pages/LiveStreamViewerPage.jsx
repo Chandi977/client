@@ -56,7 +56,7 @@ const LiveStreamViewerPage = () => {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row p-4 md:p-6 gap-6">
+    <div className="flex flex-col lg:flex-row p-4 md:p-6 gap-6 min-h-[calc(100vh-3.5rem)]">
       <Helmet>
         <title>{`${stream.title} (LIVE) - YoutubeClone`}</title>
         <meta name="description" content={stream.description} />

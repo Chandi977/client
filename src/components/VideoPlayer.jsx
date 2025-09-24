@@ -285,18 +285,18 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
           />
 
           {/* Bottom Controls */}
-          <div className="flex items-center justify-between mt-2">
-            <div className="flex items-center gap-4">
+          <div className="flex items-center justify-between mt-1 md:mt-2">
+            <div className="flex items-center gap-2 md:gap-4">
               <button onClick={onPrevious} className="text-white">
-                <SkipBack />
+                <SkipBack size={20} />
               </button>
               <button onClick={togglePlayPause} className="text-white">
-                {isPlaying ? <Pause /> : <Play />}
+                {isPlaying ? <Pause size={24} /> : <Play size={24} />}
               </button>
               <button onClick={onNext} className="text-white">
-                <SkipForward />
+                <SkipForward size={20} />
               </button>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 md:gap-2">
                 <button onClick={toggleMute}>
                   {isMuted || volume === 0 ? <VolumeX /> : <Volume2 />}
                 </button>
@@ -306,8 +306,8 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
                   max="1"
                   step="0.1"
                   value={volume}
-                  onChange={handleVolumeChange}
-                  className="w-20 h-1 accent-white"
+                  onChange={handleVolumeChange} // Use accent-blue-500 to match the timeline
+                  className="w-12 md:w-20 h-1 accent-blue-500"
                 />
               </div>
               <span className="text-sm">
@@ -315,7 +315,7 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
               </span>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1 md:gap-2">
               <div className="relative">
                 <button
                   onClick={() => {
@@ -324,10 +324,10 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
                   }}
                   title="Settings"
                 >
-                  <Settings />
+                  <Settings size={20} />
                 </button>
                 {showSettings && (
-                  <div className="absolute bottom-full right-0 mb-2 bg-black/80 backdrop-blur-sm rounded-md p-2 min-w-[220px]">
+                  <div className="absolute bottom-full right-0 mb-2 bg-black/80 backdrop-blur-sm rounded-md p-2 w-56 max-h-60 overflow-y-auto">
                     {settingsMenu === "main" && (
                       <div>
                         {qualities.length > 0 && (
@@ -369,33 +369,37 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
                         <div className="border-t border-gray-600 my-1"></div>
                         <button
                           onClick={() => handleQualityChange(-1)}
-                          className={`w-full text-left text-sm p-2 rounded hover:bg-gray-700 flex justify-between items-center ${
+                          className={`w-full text-sm p-2 rounded hover:bg-gray-700 flex justify-between items-center ${
                             currentQuality === -1 ? "text-blue-400" : ""
                           }`}
                         >
                           <span>Auto</span>
                           {currentQuality === -1 && <Check size={16} />}
                         </button>
-                        {sortedQualities.map((level) => (
-                          <button
-                            key={level.index}
-                            onClick={() => handleQualityChange(level.index)}
-                            className={`w-full text-left text-sm p-2 rounded hover:bg-gray-700 flex justify-between items-center ${
-                              currentQuality === level.index
-                                ? "text-blue-400"
-                                : ""
-                            }`}
-                          >
-                            <span>
-                              {level.height > 0
-                                ? `${level.height}p`
-                                : level.name}
-                            </span>
-                            {currentQuality === level.index && (
-                              <Check size={16} />
-                            )}
-                          </button>
-                        ))}
+                        {sortedQualities.map(
+                          (
+                            level // Use flex-1 on the span to push the checkmark
+                          ) => (
+                            <button
+                              key={level.index}
+                              onClick={() => handleQualityChange(level.index)}
+                              className={`w-full text-left text-sm p-2 rounded hover:bg-gray-700 flex justify-between items-center ${
+                                currentQuality === level.index
+                                  ? "text-blue-400"
+                                  : ""
+                              }`}
+                            >
+                              <span className="flex-1 text-left">
+                                {level.height > 0
+                                  ? `${level.height}p`
+                                  : level.name}
+                              </span>
+                              {currentQuality === level.index && (
+                                <Check size={16} />
+                              )}
+                            </button>
+                          )
+                        )}
                       </div>
                     )}
                     {settingsMenu === "speed" && (
@@ -432,7 +436,7 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
                 )}
               </div>
               <button onClick={toggleFullScreen}>
-                {isFullScreen ? <Minimize /> : <Maximize />}
+                {isFullScreen ? <Minimize size={20} /> : <Maximize size={20} />}
               </button>
             </div>
           </div>

@@ -31,7 +31,7 @@ const VideoGrid = () => {
     return <div className="flex-1 p-6 text-center text-red-500">{error}</div>;
 
   return (
-    <main className="flex-1 p-6 bg-[#0f0f0f]">
+    <main className="flex-1 p-4 sm:p-6 bg-[#0f0f0f]">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-8">
         {videos.map((video, index) => (
           <VideoCard
