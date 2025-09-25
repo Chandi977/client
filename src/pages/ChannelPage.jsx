@@ -7,6 +7,7 @@ import {
   getUserVideos,
   toggleSubscription,
   getChannelSubscribers,
+  getChannelSubscriberCount,
 } from "../lib/api";
 import { useUser } from "../components/UserContext";
 import { secureUrl } from "../lib/utils";
@@ -38,14 +39,27 @@ const ChannelPage = () => {
         // Safely initialize subscribersCount
         channelData.subscribersCount =
           Number(channelData.subscribersCount) || 0;
-        setChannel(channelData);
 
-        // Fetch videos for this channel's user ID
-        const [videosRes, subscribersRes] = await Promise.all([
+        // Fetch videos, subscribers, and subscription status in parallel
+        const [videosRes, subscribersRes, countRes] = await Promise.all([
           getUserVideos(channelData._id),
           getChannelSubscribers(channelData._id),
+          getChannelSubscriberCount(channelData._id),
         ]);
+        channelData.subscribersCount = countRes || 0;
 
+        // Check initial subscription status if a user is logged in
+        if (isLoggedIn && currentUser?._id) {
+          const subscribedChannelsRes = await subscribedChannelsRes(
+            currentUser._id
+          );
+          channelData.isSubscribed =
+            subscribedChannelsRes.some(
+              (sub) => sub.channel._id === channelData._id
+            ) || false;
+        }
+
+        setChannel(channelData);
         setSubscribers(subscribersRes.data.data || []);
         // The API might return an object with a `videos` property
         setVideos(videosRes.data?.data?.videos || videosRes.data?.data || []);
@@ -58,7 +72,7 @@ const ChannelPage = () => {
     };
 
     fetchChannelData();
-  }, [username, userLoading]);
+  }, [username, userLoading, isLoggedIn, currentUser]);
 
   const handleToggleSubscription = async () => {
     if (!isLoggedIn) {
@@ -79,7 +93,13 @@ const ChannelPage = () => {
     }));
 
     try {
-      await toggleSubscription(channel._id);
+      const data = await toggleSubscription(channel._id);
+      // Re-sync with the actual server state
+      setChannel((prev) => ({
+        ...prev,
+        isSubscribed: data.isSubscribed,
+        subscribersCount: data.subscribersCount,
+      }));
     } catch (err) {
       console.error("Subscription toggle failed:", err);
       toast.error("Something went wrong.");

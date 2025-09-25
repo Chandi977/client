@@ -96,8 +96,7 @@ export const getUserPlaylists = (userId) => api.get(`/playlist/user/${userId}`);
 // Toggle subscription (subscribe/unsubscribe to a channel)
 export const toggleSubscription = async (channelId) => {
   const res = await api.post(`/subscriptions/c/${channelId}`);
-  // backend returns: { success, isSubscribed, subscribersCount }
-  return res.data;
+  return res.data.data; // backend returns: { isSubscribed, subscribersCount }
 };
 
 // Get all channels the current user is subscribed to
@@ -114,8 +113,8 @@ export const getChannelSubscribers = async (channelId) => {
 
 // Get subscriber count for a channel
 export const getChannelSubscriberCount = async (channelId) => {
-  const res = await api.get(`/subscriptions/count/${channelId}`);
-  return res.data.count; // { count: number }
+  const response = await api.get(`/subscriptions/count/${channelId}`);
+  return response.data.data.count; // { data: { count: number } }
 };
 
 // ================= LIKE APIs =================

@@ -90,6 +90,21 @@ const VideoDetailPage = () => {
           fetchedVideo.isLiked = false;
           fetchedVideo.likesCount = fetchedVideo.likesCount || 0;
         }
+
+        // Check initial subscription status
+        if (isLoggedIn && user?._id && fetchedVideo.owner?._id) {
+          const subscribedChannels = await api.getSubscribedChannels(user._id);
+          fetchedVideo.isSubscribed =
+            subscribedChannels.some(
+              (sub) => sub.channel._id === fetchedVideo.owner._id
+            ) || false;
+
+          // Fetch subscriber count
+          const countRes = await api.getChannelSubscriberCount(
+            fetchedVideo.owner._id
+          );
+          fetchedVideo.owner.subscribersCount = countRes || 0;
+        }
       }
 
       setVideo(fetchedVideo);
@@ -102,13 +117,38 @@ const VideoDetailPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [id, userLoading]);
+  }, [id, user, isLoggedIn, userLoading]); // Keep dependencies here for useCallback
 
   useEffect(() => {
     fetchVideoData();
-  }, [fetchVideoData]);
+  }, [id, isLoggedIn, user?._id]); // Use stable primitive values as dependencies
 
-  /** Record video view */
+  // Record video view
+  useEffect(() => {
+    if (!video?._id || !isLoggedIn) return;
+
+    // Use sessionStorage to prevent re-recording views during the same session
+    const viewedKey = `viewed_${video._id}`;
+    if (sessionStorage.getItem(viewedKey)) {
+      return;
+    }
+
+    const recordUserView = async () => {
+      try {
+        // Optimistically update the UI
+        setVideo((prev) =>
+          prev ? { ...prev, views: (prev.views || 0) + 1 } : prev
+        );
+        sessionStorage.setItem(viewedKey, "true");
+        // Then, send the request to the backend
+        await api.recordView(video._id);
+      } catch (err) {
+        console.error("Failed to record view:", err);
+        // Revert on failure if necessary, though for views it's often okay to leave it.
+      }
+    };
+    recordUserView();
+  }, [video?._id, isLoggedIn]); // Depends only on video ID and login status
 
   /** Toggle like status */
   const handleToggleVideoLike = async () => {
@@ -136,43 +176,70 @@ const VideoDetailPage = () => {
 
   /** Toggle subscription */
   const handleToggleSubscription = async () => {
-    if (!isLoggedIn || !video?.owner?._id || user?._id === video.owner._id) {
-      return toast.error("Cannot subscribe.");
+    if (!isLoggedIn) {
+      toast.error("You must be logged in to subscribe.");
+      return;
     }
 
+    if (!video || !video.owner) return;
+
+    // Prevent subscribing to own channel
+    if (user?._id === video.owner._id) {
+      toast.error("You cannot subscribe to your own channel.");
+      return;
+    }
+
+    // Optimistic UI update
     setVideo((prev) => {
-      if (!prev) return null;
-      const newIsSubscribed = !prev.isSubscribed;
+      if (!prev || !prev.owner) return prev;
+
+      const currentlySubscribed = prev.isSubscribed || false;
       return {
         ...prev,
-        isSubscribed: newIsSubscribed,
+        isSubscribed: !currentlySubscribed,
         owner: {
           ...prev.owner,
           subscribersCount:
-            prev.owner.subscribersCount + (newIsSubscribed ? 1 : -1),
+            (prev.owner.subscribersCount || 0) + (currentlySubscribed ? -1 : 1),
         },
       };
     });
 
     try {
-      await api.toggleSubscription(video.owner._id);
-    } catch (err) {
-      console.log(err);
+      const data = await api.toggleSubscription(video.owner._id);
 
-      toast.error("Failed to toggle subscription");
-      setVideo((prev) =>
-        prev
-          ? {
-              ...prev,
-              isSubscribed: !prev.isSubscribed,
-              owner: {
-                ...prev.owner,
-                subscribersCount:
-                  prev.owner.subscribersCount + (prev.isSubscribed ? 1 : -1),
-              },
-            }
-          : prev
-      );
+      // Sync with backend
+      setVideo((prev) => {
+        if (!prev || !prev.owner) return prev;
+        return {
+          ...prev,
+          isSubscribed: data.isSubscribed,
+          owner: {
+            ...prev.owner,
+            subscribersCount: data.subscribersCount,
+          },
+        };
+      });
+    } catch (err) {
+      console.error("Subscription toggle failed:", err);
+      toast.error("Something went wrong.");
+
+      // Revert UI on failure
+      setVideo((prev) => {
+        if (!prev || !prev.owner) return prev;
+
+        const currentlySubscribed = prev.isSubscribed || false;
+        return {
+          ...prev,
+          isSubscribed: !currentlySubscribed,
+          owner: {
+            ...prev.owner,
+            subscribersCount:
+              (prev.owner.subscribersCount || 0) +
+              (currentlySubscribed ? 1 : -1),
+          },
+        };
+      });
     }
   };
 
