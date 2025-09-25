@@ -3,7 +3,12 @@ import { useState, useEffect, useCallback } from "react";
 import toast from "react-hot-toast";
 import Comment from "./Comment";
 import { User } from "lucide-react";
-import { getVideoComments, addComment } from "../lib/api";
+import {
+  getVideoComments,
+  addComment,
+  updateComment,
+  deleteComment,
+} from "../lib/api";
 import { useUser } from "./UserContext";
 
 const Comments = ({ videoId, videoOwnerId }) => {
@@ -13,47 +18,57 @@ const Comments = ({ videoId, videoOwnerId }) => {
   const [page, setPage] = useState(1);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [totalComments, setTotalComments] = useState(0);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  // Helper to normalize API responses
+  const normalizeComments = (data) => {
+    if (!data) return [];
+    return Array.isArray(data) ? data : [data];
+  };
 
   const fetchComments = useCallback(
-    async (currentPage) => {
+    async (currentPage = 1) => {
       try {
-        setLoading(true);
+        currentPage === 1 ? setLoading(true) : setLoadingMore(true);
+
         const response = await getVideoComments(videoId, {
           page: currentPage,
           limit: 10,
         });
-        const data = response.data.data || [];
 
-        const populatedComments = data.map((c) => ({
+        const rawData = response?.data?.data || [];
+        const formatted = normalizeComments(rawData).map((c) => ({
           ...c,
           owner:
             c.owner && typeof c.owner === "object"
               ? c.owner
-              : { username: "Unknown", avatar: "" },
+              : { username: "Unknown", avatar: null },
         }));
 
         setComments((prev) =>
-          currentPage === 1
-            ? populatedComments
-            : [...prev, ...populatedComments]
+          currentPage === 1 ? formatted : [...prev, ...formatted]
         );
-        setHasNextPage(false); // adjust if your API has pagination
-      } catch (error) {
-        toast.error("Could not load comments.");
-        console.error(error);
+        setTotalComments(formatted.length);
+
+        // TODO: Update hasNextPage based on backend pagination info
+        setHasNextPage(false);
+      } catch (err) {
+        toast.error("Failed to load comments.");
+        console.error(err);
       } finally {
         setLoading(false);
+        setLoadingMore(false);
       }
     },
     [videoId]
   );
 
   useEffect(() => {
-    if (videoId) {
-      setComments([]);
-      setPage(1);
-      fetchComments(1);
-    }
+    if (!videoId) return;
+    setComments([]);
+    setPage(1);
+    fetchComments(1);
   }, [videoId, fetchComments]);
 
   const handleLoadMore = () => {
@@ -70,39 +85,93 @@ const Comments = ({ videoId, videoOwnerId }) => {
     if (!text.trim()) return;
 
     try {
-      const payload = { content: text };
-      if (parentCommentId) payload.parentCommentId = parentCommentId;
+      const payload = { content: text, video: videoId };
+      if (parentCommentId) payload.parentId = parentCommentId;
 
-      const response = await addComment(videoId, payload);
-      const newCommentData = { ...response.data.data, owner: user };
+      const response = await addComment(payload, { page, limit: 10 });
+      const updatedComments = normalizeComments(response?.data?.data);
 
-      if (parentCommentId) {
-        setComments((prev) =>
-          prev.map((c) =>
-            c._id === parentCommentId
-              ? { ...c, replies: [newCommentData, ...(c.replies || [])] }
-              : c
-          )
-        );
-      } else {
-        setComments((prev) => [newCommentData, ...prev]);
-      }
+      setComments(updatedComments);
+      setTotalComments(updatedComments.length);
 
       toast.success("Comment posted!");
     } catch (err) {
       toast.error("Failed to post comment.");
+      console.error(err);
+    }
+  };
+
+  const onUpdateComment = async (commentId, text) => {
+    if (!isLoggedIn) {
+      toast.error("You must be logged in to edit a comment.");
+      return;
+    }
+    if (!text.trim()) return;
+
+    try {
+      await updateComment(commentId, { updateContent: text });
+
+      // Update comment in state locally
+      const updateInComments = (commentsArray) => {
+        return commentsArray.map((c) => {
+          if (c._id === commentId) {
+            return { ...c, content: text };
+          }
+          if (c.replies && c.replies.length > 0) {
+            return { ...c, replies: updateInComments(c.replies) };
+          }
+          return c;
+        });
+      };
+
+      setComments((prev) => updateInComments(prev));
+      toast.success("Comment updated!");
+    } catch (err) {
+      toast.error("Failed to update comment.");
+      console.error(err);
+    }
+  };
+
+  const onDeleteComment = async (commentId) => {
+    if (!isLoggedIn) {
+      toast.error("You must be logged in to delete a comment.");
+      return;
+    }
+
+    try {
+      await deleteComment(commentId);
+
+      // Remove comment from state locally
+      const removeInComments = (commentsArray) => {
+        return commentsArray
+          .filter((c) => c._id !== commentId)
+          .map((c) => {
+            if (c.replies && c.replies.length > 0) {
+              return { ...c, replies: removeInComments(c.replies) };
+            }
+            return c;
+          });
+      };
+
+      setComments((prev) => removeInComments(prev));
+      setTotalComments((prev) => prev - 1);
+      toast.success("Comment deleted!");
+    } catch (err) {
+      toast.error("Failed to delete comment.");
+      console.error(err);
     }
   };
 
   const handleCommentSubmit = () => {
-    if (!newComment.trim()) return;
     onPostComment(newComment, null);
     setNewComment("");
   };
 
   return (
     <div className="mt-6 text-white">
-      <h2 className="text-xl font-bold mb-4">{comments.length} Comments</h2>
+      <h2 className="text-xl font-bold mb-4">
+        {totalComments} {totalComments === 1 ? "Comment" : "Comments"}
+      </h2>
 
       {/* Add Comment Input */}
       <div className="flex items-start gap-4 mb-8">
@@ -163,11 +232,13 @@ const Comments = ({ videoId, videoOwnerId }) => {
             likes={comment.likesCount || 0}
             isLiked={comment.isLiked}
             onPostComment={onPostComment}
+            onUpdateComment={onUpdateComment}
+            onDeleteComment={onDeleteComment}
             replies={comment.replies || []}
             videoOwnerId={videoOwnerId}
           />
         ))}
-        {hasNextPage && !loading && (
+        {hasNextPage && !loadingMore && (
           <button
             onClick={handleLoadMore}
             className="w-full mt-4 px-4 py-2 bg-gray-700 rounded-full font-semibold hover:bg-gray-600"
@@ -175,6 +246,7 @@ const Comments = ({ videoId, videoOwnerId }) => {
             Load More Comments
           </button>
         )}
+        {loadingMore && <p className="text-center">Loading more comments...</p>}
       </div>
     </div>
   );

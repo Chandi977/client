@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import toast from "react-hot-toast";
 import {
   getUserChannelProfile,
   getUserVideos,
   toggleSubscription,
+  getChannelSubscribers,
 } from "../lib/api";
 import { useUser } from "../components/UserContext";
 import { secureUrl } from "../lib/utils";
@@ -17,7 +18,8 @@ const ChannelPage = () => {
   const { user: currentUser, isLoggedIn, loading: userLoading } = useUser();
   const [channel, setChannel] = useState(null);
   const [videos, setVideos] = useState([]);
-  const [activeTab, setActiveTab] = useState("videos"); // 'videos' or 'community'
+  const [subscribers, setSubscribers] = useState([]);
+  const [activeTab, setActiveTab] = useState("videos"); // 'videos', 'community', or 'subscribers'
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -32,10 +34,19 @@ const ChannelPage = () => {
         if (!profileRes.data.success || !profileRes.data.data) {
           throw new Error("Channel not found.");
         }
-        setChannel(profileRes.data.data);
+        const channelData = profileRes.data.data;
+        // Safely initialize subscribersCount
+        channelData.subscribersCount =
+          Number(channelData.subscribersCount) || 0;
+        setChannel(channelData);
 
         // Fetch videos for this channel's user ID
-        const videosRes = await getUserVideos(profileRes.data.data._id);
+        const [videosRes, subscribersRes] = await Promise.all([
+          getUserVideos(channelData._id),
+          getChannelSubscribers(channelData._id),
+        ]);
+
+        setSubscribers(subscribersRes.data.data || []);
         // The API might return an object with a `videos` property
         setVideos(videosRes.data?.data?.videos || videosRes.data?.data || []);
       } catch (err) {
@@ -63,9 +74,8 @@ const ChannelPage = () => {
     setChannel((prev) => ({
       ...prev,
       isSubscribed: !prev.isSubscribed,
-      subscribersCount: prev.isSubscribed
-        ? prev.subscribersCount - 1
-        : prev.subscribersCount + 1,
+      subscribersCount:
+        (prev.subscribersCount || 0) + (prev.isSubscribed ? -1 : 1),
     }));
 
     try {
@@ -77,9 +87,8 @@ const ChannelPage = () => {
       setChannel((prev) => ({
         ...prev,
         isSubscribed: !prev.isSubscribed,
-        subscribersCount: prev.isSubscribed
-          ? prev.subscribersCount - 1
-          : prev.subscribersCount + 1,
+        subscribersCount:
+          (prev.subscribersCount || 0) + (prev.isSubscribed ? -1 : 1),
       }));
     }
   };
@@ -174,13 +183,43 @@ const ChannelPage = () => {
                 <VideoCard
                   key={video._id}
                   videoId={video._id}
-                  {...video}
-                  owner={channel}
+                  thumbnail={video.thumbnail}
+                  title={video.title}
+                  views={video.views}
+                  timestamp={video.createdAt}
+                  channel={channel.username}
+                  channelAvatar={channel.avatar}
                 />
               ))}
           </div>
         )}
         {activeTab === "community" && <CommunityTab channel={channel} />}
+        {activeTab === "subscribers" && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {subscribers.length > 0 ? (
+              subscribers.map(({ subscriber }) => (
+                <Link
+                  to={`/channel/${subscriber.username}`}
+                  key={subscriber._id}
+                  className="flex flex-col items-center gap-2 p-2 rounded-lg hover:bg-gray-800"
+                >
+                  <img
+                    src={secureUrl(subscriber.avatar)}
+                    alt={subscriber.username}
+                    className="w-24 h-24 rounded-full object-cover"
+                  />
+                  <p className="font-semibold text-center">
+                    {subscriber.username}
+                  </p>
+                </Link>
+              ))
+            ) : (
+              <p className="col-span-full text-center text-gray-400">
+                This channel has no subscribers yet.
+              </p>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

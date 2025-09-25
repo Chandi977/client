@@ -16,8 +16,7 @@ const HistoryPage = () => {
       try {
         setLoading(true);
         const response = await getWatchHistory();
-        // The API seems to return history items which contain the video object
-        setVideos(response.data.data.map((item) => item.video) || []);
+        setVideos(response.data.data || []);
       } catch (err) {
         setError(
           "Failed to fetch watch history. Please make sure you are logged in."
@@ -38,17 +37,24 @@ const HistoryPage = () => {
       <h1 className="text-2xl font-bold mb-6">Watch History</h1>
       <div className="flex flex-col gap-4">
         {videos.length > 0 ? (
-          videos.map(
-            (video) =>
+          videos.map((historyItem) => {
+            const video = historyItem.video;
+            return (
               video && (
                 <VideoCard
-                  key={video._id}
+                  key={historyItem._id} // Use history item's _id for the key
                   videoId={video._id}
-                  {...video}
+                  thumbnail={video.thumbnail}
+                  title={video.title}
+                  views={video.views}
+                  timestamp={video.createdAt}
+                  channel={video.owner?.username} // Explicitly pass the username
+                  channelAvatar={video.owner?.avatar}
                   variant="horizontal"
                 />
               )
-          )
+            );
+          })
         ) : (
           <p>Your watch history is empty.</p>
         )}

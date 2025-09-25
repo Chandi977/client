@@ -117,7 +117,12 @@ const PlaylistDetailPage = () => {
                 <div className="flex-grow">
                   <VideoCard
                     videoId={video._id}
-                    {...video}
+                    thumbnail={video.thumbnail}
+                    title={video.title}
+                    views={video.views}
+                    timestamp={video.createdAt}
+                    channel={video.owner?.username}
+                    channelAvatar={video.owner?.avatar}
                     variant="horizontal"
                   />
                 </div>

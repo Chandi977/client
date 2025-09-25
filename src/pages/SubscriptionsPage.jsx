@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getSubscribedChannels } from "../lib/api";
+import { secureUrl } from "../lib/utils";
 import { useUser } from "../components/UserContext";
 
 const SubscriptionsPage = () => {
@@ -49,7 +50,7 @@ const SubscriptionsPage = () => {
               className="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-800"
             >
               <img
-                src={channel.avatar}
+                src={secureUrl(channel.avatar)}
                 alt={channel.username}
                 className="w-12 h-12 rounded-full"
               />

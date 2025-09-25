@@ -16,8 +16,8 @@ const LikedVideosPage = () => {
       try {
         setLoading(true);
         const response = await getLikedVideos();
-        // The API returns an array of liked video documents
-        setVideos(response.data.data || []);
+        // The API returns an array of liked video documents directly
+        setVideos(response || []);
       } catch (err) {
         setError(
           "Failed to fetch liked videos. Please make sure you are logged in."
@@ -38,21 +38,24 @@ const LikedVideosPage = () => {
     <div className="p-6 bg-[#0f0f0f] min-h-[calc(100vh-3.5rem)]">
       <h1 className="text-2xl font-bold mb-6">Liked Videos</h1>
       <div className="flex flex-col gap-4">
-        {videos.length > 0 ? (
-          videos.map(
-            (video) =>
-              video && (
-                <VideoCard
-                  key={video._id}
-                  videoId={video._id}
-                  {...video}
-                  variant="horizontal"
-                />
-              )
-          )
-        ) : (
-          <p>You haven't liked any videos yet.</p>
-        )}
+        {videos
+          .filter((like) => like.video)
+          .map((like, index) => {
+            const video = like.video;
+            return (
+              <VideoCard
+                key={like._id || video._id || index}
+                videoId={video._id}
+                thumbnail={video.thumbnail}
+                title={video.title}
+                views={video.views}
+                timestamp={video.createdAt}
+                channel={video.owner?.username}
+                channelAvatar={video.owner?.avatar}
+                variant="horizontal"
+              />
+            );
+          })}
       </div>
     </div>
   );

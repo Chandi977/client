@@ -39,8 +39,12 @@ const TrendingPage = () => {
             <VideoCard
               key={video._id}
               videoId={video._id}
-              {...video}
-              owner={video.owner}
+              thumbnail={video.thumbnail}
+              title={video.title}
+              views={video.views}
+              timestamp={video.createdAt}
+              channel={video.owner?.username}
+              channelAvatar={video.owner?.avatar}
             />
           ))
         ) : (

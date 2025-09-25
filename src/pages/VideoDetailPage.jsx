@@ -52,6 +52,8 @@ const createMasterPlaylist = (resolutions) => {
 
 const VideoDetailPage = () => {
   const { id } = useParams();
+  // console.log(id);
+
   const navigate = useNavigate();
   const { user, isLoggedIn, loading: userLoading } = useUser();
 
@@ -59,7 +61,6 @@ const VideoDetailPage = () => {
   const [recommendedVideos, setRecommendedVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [viewRecorded, setViewRecorded] = useState(false);
   const [isPlaylistModalOpen, setIsPlaylistModalOpen] = useState(false);
 
   /** Fetch video & recommendations */
@@ -75,14 +76,29 @@ const VideoDetailPage = () => {
         api.getAllVideos({ limit: 10 }),
       ]);
 
-      const fetchedVideo = videoRes?.data?.data || null;
-      // console.log("Fetched video data in VideoDetailPage:", fetchedVideo);
+      let fetchedVideo = videoRes?.data?.data || null;
+
+      if (fetchedVideo) {
+        // Fetch like status and merge it into the video object
+        try {
+          const likesData = await api.getVideoLikes(id);
+          fetchedVideo.isLiked = likesData.isLiked;
+          fetchedVideo.likesCount = likesData.count;
+        } catch (likeError) {
+          console.error("Could not fetch like status:", likeError);
+          // Gracefully handle if likes fail to load
+          fetchedVideo.isLiked = false;
+          fetchedVideo.likesCount = fetchedVideo.likesCount || 0;
+        }
+      }
+
       setVideo(fetchedVideo);
       setRecommendedVideos(
         allVideosRes?.data?.data?.videos?.filter((v) => v._id !== id) || []
       );
-    } catch {
+    } catch (err) {
       setError("Failed to load video details.");
+      console.error("Failed to load video:", err);
     } finally {
       setLoading(false);
     }
@@ -92,38 +108,7 @@ const VideoDetailPage = () => {
     fetchVideoData();
   }, [fetchVideoData]);
 
-  /** Check if video is liked */
-  useEffect(() => {
-    if (!isLoggedIn || !video?._id) return;
-
-    const checkLikeStatus = async () => {
-      try {
-        const likedVideosRes = await api.getLikedVideos();
-        const isLiked = likedVideosRes.data.data.some(
-          (v) => v._id === video._id
-        );
-        setVideo((prev) => (prev ? { ...prev, isLiked } : prev));
-      } catch (err) {
-        console.error("Failed to check like status", err);
-      }
-    };
-
-    checkLikeStatus();
-  }, [isLoggedIn, video?._id]);
-
   /** Record video view */
-  const handleRecordView = async () => {
-    if (!isLoggedIn || !video?._id || viewRecorded) return;
-    try {
-      await api.recordView(video._id);
-      setViewRecorded(true);
-      setVideo((prev) =>
-        prev ? { ...prev, views: (prev.views || 0) + 1 } : prev
-      );
-    } catch (err) {
-      console.error("Failed to record view:", err);
-    }
-  };
 
   /** Toggle like status */
   const handleToggleVideoLike = async () => {
@@ -172,6 +157,8 @@ const VideoDetailPage = () => {
     try {
       await api.toggleSubscription(video.owner._id);
     } catch (err) {
+      console.log(err);
+
       toast.error("Failed to toggle subscription");
       setVideo((prev) =>
         prev
@@ -224,7 +211,6 @@ const VideoDetailPage = () => {
                   : secureUrl(video.videoFile?.url || video.videoFile)
               }
               poster={secureUrl(video.thumbnail?.url)}
-              onPlay={handleRecordView}
               onNext={handleNextVideo}
               onPrevious={handlePreviousVideo}
             />

@@ -11,13 +11,11 @@ const VideoGrid = () => {
     const fetchVideos = async () => {
       try {
         setLoading(true);
-        // Fetch more videos by setting a higher limit
         const response = await getAllVideos({ limit: 20 });
-        // The actual videos are in response.data.data.videos
         setVideos(response.data.data.videos || []);
       } catch (err) {
+        console.log(err);
         setError("Failed to fetch videos. Make sure your backend is running.");
-        // console.error(err);
       } finally {
         setLoading(false);
       }
@@ -32,7 +30,7 @@ const VideoGrid = () => {
 
   return (
     <main className="flex-1 p-4 sm:p-6 bg-[#0f0f0f]">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {videos.map((video, index) => (
           <VideoCard
             key={video._id || index}
@@ -43,7 +41,6 @@ const VideoGrid = () => {
             channel={video.owner?.username}
             views={video.views}
             timestamp={video.createdAt}
-            owner={video.owner}
           />
         ))}
       </div>

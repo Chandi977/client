@@ -42,9 +42,12 @@ export const getUserChannelProfile = (username) =>
   api.get(`/users/channel/${username}`);
 export const getWatchHistory = () => api.get("/users/watch-history");
 export const getFeed = () => api.get("/users/feed");
-export const recommendedVideos = () => api.get("/users/recommended-videos");
+export const getRecommendedVideos = () => api.get("/users/recommended-videos");
 export const recommendChannels = () => api.get("/users/recommended-channels");
-export const getLikedVideos = () => api.get("/users/liked-videos");
+export const getLikedVideos = async () => {
+  const res = await api.get("/users/liked-videos");
+  return res.data.data;
+};
 export const getHistory = () => api.get("/users/history");
 
 // ================= VIDEO APIs =================
@@ -72,8 +75,7 @@ export const togglePublishStatus = (videoId) =>
 
 // ================= JOBS APIs (for uploads) =================
 export const getJobStatus = (jobId) => api.get(`/jobs/${jobId}`);
-export const cancelVideoUpload = (jobId) =>
-  api.delete(`/jobs/${jobId}/cancel`);
+export const cancelVideoUpload = (jobId) => api.delete(`/jobs/${jobId}/cancel`);
 
 // ================= PLAYLIST APIs =================
 export const createPlaylist = (data) => api.post("/playlist", data);
@@ -90,22 +92,69 @@ export const removeVideoFromPlaylist = (videoId, playlistId) =>
 export const getUserPlaylists = (userId) => api.get(`/playlist/user/${userId}`);
 
 // ================= SUBSCRIPTION APIs =================
-export const toggleSubscription = (channelId) =>
-  api.post(`/subscriptions/c/${channelId}`);
-export const getSubscribedChannels = (subscriberId) =>
-  api.get(`/subscriptions/c/${subscriberId}`);
-export const getUserSubscribers = (channelId) =>
-  api.get(`/subscriptions/u/${channelId}`);
+
+// Toggle subscription (subscribe/unsubscribe to a channel)
+export const toggleSubscription = async (channelId) => {
+  const res = await api.post(`/subscriptions/c/${channelId}`);
+  // backend returns: { success, isSubscribed, subscribersCount }
+  return res.data;
+};
+
+// Get all channels the current user is subscribed to
+export const getSubscribedChannels = async (userId) => {
+  const res = await api.get(`/subscriptions/c/${userId}`);
+  return res.data.data; // array of channels
+};
+
+// Get all subscribers of a channel
+export const getChannelSubscribers = async (channelId) => {
+  const res = await api.get(`/subscriptions/u/${channelId}`);
+  return res.data.data; // array of subscribers
+};
+
+// Get subscriber count for a channel
+export const getChannelSubscriberCount = async (channelId) => {
+  const res = await api.get(`/subscriptions/count/${channelId}`);
+  return res.data.count; // { count: number }
+};
 
 // ================= LIKE APIs =================
-export const toggleVideoLike = (videoId) =>
-  api.post(`/likes/v/${videoId}/toggle`);
-export const getVideoLikes = (videoId) => api.get(`/likes/v/${videoId}`);
-export const toggleCommentLike = (commentId) =>
-  api.post(`/likes/c/${commentId}/toggle`);
-export const getCommentLikes = (commentId) => api.get(`/likes/c/${commentId}`);
-export const getTweetLikes = (tweetId) => api.get(`/likes/t/${tweetId}`);
-export const getAllLikedVideos = () => api.get(`/likes/videos`);
+export const toggleVideoLike = async (videoId) => {
+  const res = await api.post(`/likes/v/${videoId}/toggle`);
+  return res.data.data; // { liked: true/false }
+};
+
+export const getVideoLikes = async (videoId) => {
+  const res = await api.get(`/likes/v/${videoId}`);
+  // Returns { count: number, isLiked: boolean } if backend supports it
+  return res.data.data;
+};
+
+export const toggleCommentLike = async (commentId) => {
+  const res = await api.post(`/likes/c/${commentId}/toggle`);
+  return res.data.data; // { liked: true/false }
+};
+
+export const getCommentLikes = async (commentId) => {
+  const res = await api.get(`/likes/c/${commentId}`);
+  return res.data.data;
+};
+
+export const toggleTweetLike = async (tweetId) => {
+  const res = await api.post(`/likes/t/${tweetId}/toggle`);
+  return res.data.data;
+};
+
+export const getTweetLikes = async (tweetId) => {
+  const res = await api.get(`/likes/t/${tweetId}`);
+  return res.data.data;
+};
+
+export const getAllLikedVideos = async () => {
+  const res = await api.get(`/likes/videos`);
+  // Returns array of { video, channel }
+  return res.data.data;
+};
 
 // ================= TWEET APIs =================
 export const createTweet = (data) => api.post("/tweets", data);
@@ -115,12 +164,12 @@ export const deleteTweet = (tweetId) => api.delete(`/tweets/${tweetId}`);
 // ================= COMMENT APIs =================
 export const getVideoComments = (videoId, params) =>
   api.get(`/comments/${videoId}`, { params });
-export const addComment = (videoId, data) =>
-  api.post(`/comments/${videoId}`, data);
+export const addComment = (data, params) =>
+  api.post("/comments", data, { params });
 export const updateComment = (commentId, data) =>
-  api.patch(`/comments/c/${commentId}`, data);
+  api.patch(`/comments/${commentId}`, data);
 export const deleteComment = (commentId) =>
-  api.delete(`/comments/c/${commentId}`);
+  api.delete(`/comments/${commentId}`);
 
 // ================= LIVE STREAM APIs =================
 export const getLiveStreams = () => api.get(`/livestreams`);

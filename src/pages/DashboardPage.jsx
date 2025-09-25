@@ -98,7 +98,8 @@ const DashboardPage = () => {
                 title={video.title}
                 views={video.views || 0}
                 timestamp={video.createdAt}
-                owner={user}
+                channel={user.username}
+                channelAvatar={user.avatar}
               />
             ))}
           </div>
