@@ -3,28 +3,14 @@
 A modern, responsive React frontend application for the VideoTube YouTube clone platform. Built with React 18 and Vite for optimal performance, this client provides an intuitive and engaging user interface for video streaming, content management, and social interactions.
 
 ## ✨ Features
+
 ![React](https://img.shields.io/badge/React-18-blue?logo=react)
 ![Vite](https://img.shields.io/badge/Vite-Frontend-orange?logo=vite)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)
 
-
-Screenshots
-
-<img width="1920" height="1080" alt="Screenshot 2025-09-29 205032" src="https://github.com/user-attachments/assets/bcb89e51-688a-4f87-91ab-26630d95d6c1" />
-<img width="1920" height="1080" alt="Screenshot 2025-09-29 204939" src="https://github.com/user-attachments/assets/1341026b-ed3e-4d00-bc5a-be7bf7fe4309" />
-<img width="1920" height="1080" alt="Screenshot 2025-09-29 204918" src="https://github.com/user-attachments/assets/e7a77227-a1b1-444a-8a93-00b4b3f103fe" />
-<img width="1920" height="1080" alt="Screenshot 2025-09-29 204835" src="https://github.com/user-attachments/assets/59d62d3a-70ac-41e5-998c-47a9a89e00eb" />
-<img width="1920" height="1080" alt="Screenshot 2025-09-29 204709" src="https://github.com/user-attachments/assets/54c9b927-8b1f-4f7f-9e5c-dd885ace8e38" />
-<img width="1920" height="1080" alt="Screenshot 2025-09-29 204654" src="https://github.com/user-attachments/assets/59e9c6c1-0fb4-4b59-88a8-d13d78c6f318" />
-<img width="1920" height="1080" alt="Screenshot 2025-09-29 205750" src="https://github.com/user-attachments/assets/1027e38d-d771-47f7-a5f6-1a06fbe4d9da" />
-<img width="1920" height="1080" alt="Screenshot 2025-09-29 205224" src="https://github.com/user-attachments/assets/3aef1a6a-25a0-48ee-84a4-3077a249a38a" />
-<img width="1920" height="1080" alt="Screenshot 2025-09-29 205102" src="https://github.com/user-attachments/assets/90773e2d-0a9c-41f8-b1c6-892af735ca38" />
-<img width="1920" height="1080" alt="Screenshot 2025-09-29 205052" src="https://github.com/user-attachments/assets/1fa06161-fb37-4e21-b33e-a6959b37b1ca" />
-
-
-
 ### User Interface & Experience
+
 - 🎨 **Modern Design System** - Clean, contemporary UI with responsive layouts
 - 📱 **Mobile-First Responsive** - Seamless experience across all devices and screen sizes
 - ⚡ **Lightning Fast** - Vite-powered development with Hot Module Replacement (HMR)
@@ -32,6 +18,7 @@ Screenshots
 - 🌙 **Theme Support** - Ready for dark/light mode implementation
 
 ### Core Functionality (Planned/In Development)
+
 - 🔐 **Authentication UI** - Login, registration, and profile management interfaces
 - 📹 **Video Player** - Custom video player with full playback controls
 - 🎬 **Video Gallery** - Grid and list layouts for video browsing
@@ -44,6 +31,7 @@ Screenshots
 - 🎛️ **Settings Panel** - User preferences and account management
 
 ### Technical Features
+
 - 🔄 **Real-time Updates** - Dynamic content loading and state management
 - 📤 **File Upload Interface** - Drag-and-drop video and thumbnail uploads
 - 🎮 **Interactive Controls** - Advanced video player customization
@@ -51,9 +39,23 @@ Screenshots
 - 🔔 **Notification System** - In-app notifications and alerts
 - ⚙️ **Performance Optimized** - Code splitting and lazy loading implementation
 
+## 📸 Screenshots
+
+<img alt="Home Page" src="https://github.com/user-attachments/assets/bcb89e51-688a-4f87-91ab-26630d95d6c1" width="49%">
+<img alt="Search Results" src="https://github.com/user-attachments/assets/1341026b-ed3e-4d00-bc5a-be7bf7fe4309" width="49%">
+<img alt="Video Watch Page" src="https://github.com/user-attachments/assets/e7a77227-a1b1-444a-8a93-00b4b3f103fe" width="49%">
+<img alt="Channel Page" src="https://github.com/user-attachments/assets/59d62d3a-70ac-41e5-998c-47a9a89e00eb" width="49%">
+<img alt="Creator Dashboard" src="https://github.com/user-attachments/assets/54c9b927-8b1f-4f7f-9e5c-dd885ace8e38" width="49%">
+<img alt="Liked Videos" src="https://github.com/user-attachments/assets/59e9c6c1-0fb4-4b59-88a8-d13d78c6f318" width="49%">
+<img alt="Login Page" src="https://github.com/user-attachments/assets/1027e38d-d771-47f7-a5f6-1a06fbe4d9da" width="49%">
+<img alt="Sign Up Page" src="https://github.com/user-attachments/assets/3aef1a6a-25a0-48ee-84a4-3077a249a38a" width="49%">
+<img alt="Video Upload" src="https://github.com/user-attachments/assets/90773e2d-0a9c-41f8-b1c6-892af735ca38" width="49%">
+<img alt="User Library" src="https://github.com/user-attachments/assets/1fa06161-fb37-4e21-b33e-a6959b37b1ca" width="49%">
+
 ## 🛠️ Tech Stack
 
 ### Core Technologies
+
 - **React 18** - Latest React with concurrent features and improved performance
 - **Vite** - Next-generation frontend build tool for faster development
 - **JavaScript (ES6+)** - Modern JavaScript with latest ECMAScript features
@@ -61,6 +63,7 @@ Screenshots
 - **HTML5** - Semantic markup with accessibility best practices
 
 ### Development Tools & Configuration
+
 - **ESLint** - Code quality enforcement and consistent coding standards
 - **Vite HMR** - Hot Module Replacement for instant development feedback
 - **@vitejs/plugin-react** - Official React plugin for Vite (using Babel)
@@ -68,6 +71,7 @@ Screenshots
 - **VS Code Integration** - Optimized development environment setup
 
 ### Future Integration Plans
+
 - **React Router v6** - Client-side routing and navigation
 - **Axios/Fetch API** - HTTP client for backend communication
 - **React Query/TanStack Query** - Server state management and caching
@@ -171,6 +175,7 @@ client/
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - **Node.js** (>=16.0.0) - JavaScript runtime
 - **npm** (>=8.0.0) or **yarn** (>=1.22.0) - Package manager
 - **Git** - Version control system
@@ -179,12 +184,14 @@ client/
 ### Installation & Setup
 
 1. **Clone the repository**
+
 ```bash
 git clone https://github.com/Chandi977/client.git
 cd client
 ```
 
 2. **Install dependencies**
+
 ```bash
 npm install
 # or if using yarn
@@ -225,6 +232,7 @@ VITE_ENABLE_ANALYTICS=false
 ```
 
 4. **Start the development server**
+
 ```bash
 npm run dev
 # or with yarn
@@ -260,15 +268,10 @@ Here's the recommended structure for creating components:
 
 ```jsx
 // components/video/VideoCard.jsx
-import { useState } from 'react';
-import './VideoCard.css';
+import { useState } from "react";
+import "./VideoCard.css";
 
-const VideoCard = ({ 
-  video, 
-  onClick, 
-  className = '',
-  showStats = true 
-}) => {
+const VideoCard = ({ video, onClick, className = "", showStats = true }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
@@ -281,7 +284,7 @@ const VideoCard = ({
   const formatDuration = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   const formatViews = (views) => {
@@ -294,12 +297,12 @@ const VideoCard = ({
   };
 
   return (
-    <article 
+    <article
       className={`video-card ${className}`}
       onClick={handleCardClick}
       role="button"
       tabIndex={0}
-      onKeyPress={(e) => e.key === 'Enter' && handleCardClick()}
+      onKeyPress={(e) => e.key === "Enter" && handleCardClick()}
     >
       <div className="video-card__thumbnail">
         {!imageLoaded && !imageError && (
@@ -320,7 +323,7 @@ const VideoCard = ({
           </span>
         )}
       </div>
-      
+
       <div className="video-card__content">
         <div className="video-card__header">
           {video.owner?.avatar && (
@@ -485,8 +488,12 @@ export default VideoCard;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Responsive design */
@@ -495,32 +502,32 @@ export default VideoCard;
     flex-direction: row;
     height: 94px;
   }
-  
+
   .video-card__thumbnail {
     width: 168px;
     height: 94px;
     aspect-ratio: 16/9;
     flex-shrink: 0;
   }
-  
+
   .video-card__content {
     padding: 8px 12px;
     flex: 1;
   }
-  
+
   .video-card__header {
     gap: 8px;
   }
-  
+
   .video-card__avatar {
     display: none;
   }
-  
+
   .video-card__title {
     font-size: 13px;
     -webkit-line-clamp: 2;
   }
-  
+
   .video-card__meta {
     font-size: 11px;
   }
@@ -531,11 +538,11 @@ export default VideoCard;
     width: 120px;
     height: 68px;
   }
-  
+
   .video-card {
     height: 68px;
   }
-  
+
   .video-card__title {
     font-size: 12px;
     -webkit-line-clamp: 1;
@@ -549,13 +556,13 @@ export default VideoCard;
 
 ```javascript
 // vite.config.js
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import { resolve } from 'path'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import { resolve } from "path";
 
 export default defineConfig({
   plugins: [react()],
-  
+
   // Development server configuration
   server: {
     port: 5173,
@@ -563,50 +570,50 @@ export default defineConfig({
     open: true,
     cors: true,
   },
-  
+
   // Build configuration
   build: {
-    outDir: 'dist',
+    outDir: "dist",
     sourcemap: true,
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom'],
-          utils: ['axios', 'lodash']
-        }
-      }
-    }
+          vendor: ["react", "react-dom"],
+          utils: ["axios", "lodash"],
+        },
+      },
+    },
   },
-  
+
   // Path aliases for cleaner imports
   resolve: {
     alias: {
-      '@': resolve(__dirname, 'src'),
-      '@components': resolve(__dirname, 'src/components'),
-      '@pages': resolve(__dirname, 'src/pages'),
-      '@utils': resolve(__dirname, 'src/utils'),
-      '@assets': resolve(__dirname, 'src/assets'),
-      '@styles': resolve(__dirname, 'src/styles')
-    }
+      "@": resolve(__dirname, "src"),
+      "@components": resolve(__dirname, "src/components"),
+      "@pages": resolve(__dirname, "src/pages"),
+      "@utils": resolve(__dirname, "src/utils"),
+      "@assets": resolve(__dirname, "src/assets"),
+      "@styles": resolve(__dirname, "src/styles"),
+    },
   },
-  
+
   // CSS configuration
   css: {
     modules: {
-      localsConvention: 'camelCase'
+      localsConvention: "camelCase",
     },
     preprocessorOptions: {
       scss: {
-        additionalData: `@import "@/styles/variables.scss";`
-      }
-    }
+        additionalData: `@import "@/styles/variables.scss";`,
+      },
+    },
   },
-  
+
   // Environment variables
   define: {
     __APP_VERSION__: JSON.stringify(process.env.npm_package_version),
-  }
-})
+  },
+});
 ```
 
 ### ESLint Configuration
@@ -621,61 +628,56 @@ module.exports = {
     node: true,
   },
   extends: [
-    'eslint:recommended',
-    'plugin:react/recommended',
-    'plugin:react-hooks/recommended',
-    'plugin:jsx-a11y/recommended',
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
+    "plugin:jsx-a11y/recommended",
   ],
-  ignorePatterns: ['dist', '.eslintrc.cjs'],
+  ignorePatterns: ["dist", ".eslintrc.cjs"],
   parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
+    ecmaVersion: "latest",
+    sourceType: "module",
     ecmaFeatures: {
       jsx: true,
     },
   },
   settings: {
     react: {
-      version: 'detect',
+      version: "detect",
     },
   },
-  plugins: [
-    'react',
-    'react-hooks',
-    'jsx-a11y',
-    'react-refresh',
-  ],
+  plugins: ["react", "react-hooks", "jsx-a11y", "react-refresh"],
   rules: {
     // React specific rules
-    'react/react-in-jsx-scope': 'off',
-    'react/prop-types': 'warn',
-    'react/jsx-no-target-blank': 'error',
-    'react/jsx-uses-react': 'off',
-    'react/jsx-uses-vars': 'error',
-    
+    "react/react-in-jsx-scope": "off",
+    "react/prop-types": "warn",
+    "react/jsx-no-target-blank": "error",
+    "react/jsx-uses-react": "off",
+    "react/jsx-uses-vars": "error",
+
     // React hooks rules
-    'react-hooks/rules-of-hooks': 'error',
-    'react-hooks/exhaustive-deps': 'warn',
-    
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
+
     // General JavaScript rules
-    'no-unused-vars': 'warn',
-    'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'warn',
-    'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'warn',
-    'prefer-const': 'error',
-    'no-var': 'error',
-    
+    "no-unused-vars": "warn",
+    "no-console": process.env.NODE_ENV === "production" ? "error" : "warn",
+    "no-debugger": process.env.NODE_ENV === "production" ? "error" : "warn",
+    "prefer-const": "error",
+    "no-var": "error",
+
     // Accessibility rules
-    'jsx-a11y/anchor-is-valid': 'warn',
-    'jsx-a11y/img-redundant-alt': 'warn',
-    'jsx-a11y/aria-role': 'error',
-    
+    "jsx-a11y/anchor-is-valid": "warn",
+    "jsx-a11y/img-redundant-alt": "warn",
+    "jsx-a11y/aria-role": "error",
+
     // Hot reload
-    'react-refresh/only-export-components': [
-      'warn',
+    "react-refresh/only-export-components": [
+      "warn",
       { allowConstantExport: true },
     ],
   },
-}
+};
 ```
 
 ## 🎯 Development Guidelines
@@ -683,11 +685,12 @@ module.exports = {
 ### Component Best Practices
 
 1. **Functional Components with Hooks**
+
 ```jsx
 // ✅ Good: Use functional components
 const VideoPlayer = ({ src, autoplay = false }) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  
+
   return (
     <video src={src} autoPlay={autoplay} />
   );
@@ -698,13 +701,14 @@ class VideoPlayer extends Component { ... }
 ```
 
 2. **Props Validation and Default Values**
+
 ```jsx
 // ✅ Good: Define prop types and defaults
-const VideoCard = ({ 
+const VideoCard = ({
   video,
   onClick = () => {},
   showStats = true,
-  className = ''
+  className = "",
 }) => {
   // Component logic
 };
@@ -714,11 +718,12 @@ VideoCard.propTypes = {
   video: PropTypes.object.isRequired,
   onClick: PropTypes.func,
   showStats: PropTypes.bool,
-  className: PropTypes.string
+  className: PropTypes.string,
 };
 ```
 
 3. **Custom Hooks for Logic Reuse**
+
 ```jsx
 // hooks/useVideoPlayer.js
 const useVideoPlayer = (videoRef) => {
@@ -741,7 +746,7 @@ const useVideoPlayer = (videoRef) => {
     currentTime,
     duration,
     play,
-    pause
+    pause,
   };
 };
 ```
@@ -750,19 +755,19 @@ const useVideoPlayer = (videoRef) => {
 
 ```jsx
 // ✅ Good: Organized imports
-import React, { useState, useEffect } from 'react';
-import PropTypes from 'prop-types';
+import React, { useState, useEffect } from "react";
+import PropTypes from "prop-types";
 
 // Internal components
-import VideoCard from '@components/video/VideoCard';
-import LoadingSpinner from '@components/common/LoadingSpinner';
+import VideoCard from "@components/video/VideoCard";
+import LoadingSpinner from "@components/common/LoadingSpinner";
 
 // Utils and helpers
-import { formatDuration, formatViews } from '@utils/formatters';
-import { videoService } from '@utils/api';
+import { formatDuration, formatViews } from "@utils/formatters";
+import { videoService } from "@utils/api";
 
 // Styles
-import './VideoList.css';
+import "./VideoList.css";
 ```
 
 ### State Management Patterns
@@ -774,21 +779,21 @@ const initialState = {
   loading: false,
   error: null,
   page: 1,
-  hasMore: true
+  hasMore: true,
 };
 
 const videoReducer = (state, action) => {
   switch (action.type) {
-    case 'FETCH_START':
+    case "FETCH_START":
       return { ...state, loading: true, error: null };
-    case 'FETCH_SUCCESS':
+    case "FETCH_SUCCESS":
       return {
         ...state,
         loading: false,
         videos: [...state.videos, ...action.payload],
-        hasMore: action.payload.length > 0
+        hasMore: action.payload.length > 0,
       };
-    case 'FETCH_ERROR':
+    case "FETCH_ERROR":
       return { ...state, loading: false, error: action.payload };
     default:
       return state;
@@ -797,7 +802,7 @@ const videoReducer = (state, action) => {
 
 const VideoList = () => {
   const [state, dispatch] = useReducer(videoReducer, initialState);
-  
+
   // Component logic
 };
 ```
@@ -808,15 +813,15 @@ const VideoList = () => {
 
 ```jsx
 // App.jsx - Route-based code splitting
-import { lazy, Suspense } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import LoadingSpinner from '@components/common/LoadingSpinner';
+import { lazy, Suspense } from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import LoadingSpinner from "@components/common/LoadingSpinner";
 
 // Lazy load page components
-const Home = lazy(() => import('@pages/Home'));
-const Watch = lazy(() => import('@pages/Watch'));
-const Upload = lazy(() => import('@pages/Upload'));
-const Dashboard = lazy(() => import('@pages/Dashboard'));
+const Home = lazy(() => import("@pages/Home"));
+const Watch = lazy(() => import("@pages/Watch"));
+const Upload = lazy(() => import("@pages/Upload"));
+const Dashboard = lazy(() => import("@pages/Dashboard"));
 
 function App() {
   return (
@@ -838,14 +843,14 @@ function App() {
 
 ```jsx
 // components/common/OptimizedImage.jsx
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from "react";
 
-const OptimizedImage = ({ 
-  src, 
-  alt, 
-  placeholder = '/placeholder.jpg',
-  className = '',
-  ...props 
+const OptimizedImage = ({
+  src,
+  alt,
+  placeholder = "/placeholder.jpg",
+  className = "",
+  ...props
 }) => {
   const [loaded, setLoaded] = useState(false);
   const [inView, setInView] = useState(false);
@@ -878,7 +883,7 @@ const OptimizedImage = ({
         onLoad={() => setLoaded(true)}
         style={{
           opacity: loaded ? 1 : 0.7,
-          transition: 'opacity 0.3s ease'
+          transition: "opacity 0.3s ease",
         }}
         loading="lazy"
         {...props}
@@ -894,38 +899,40 @@ export default OptimizedImage;
 
 ```jsx
 // hooks/useVirtualList.js
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from "react";
 
 export const useVirtualList = ({
   items,
   itemHeight,
   containerHeight,
-  overscan = 5
+  overscan = 5,
 }) => {
   const [scrollTop, setScrollTop] = useState(0);
 
   const visibleRange = useMemo(() => {
     const start = Math.floor(scrollTop / itemHeight);
     const visibleCount = Math.ceil(containerHeight / itemHeight);
-    
+
     return {
       start: Math.max(0, start - overscan),
-      end: Math.min(items.length, start + visibleCount + overscan)
+      end: Math.min(items.length, start + visibleCount + overscan),
     };
   }, [scrollTop, itemHeight, containerHeight, items.length, overscan]);
 
   const visibleItems = useMemo(() => {
-    return items.slice(visibleRange.start, visibleRange.end).map((item, index) => ({
-      ...item,
-      index: visibleRange.start + index
-    }));
+    return items
+      .slice(visibleRange.start, visibleRange.end)
+      .map((item, index) => ({
+        ...item,
+        index: visibleRange.start + index,
+      }));
   }, [items, visibleRange]);
 
   return {
     visibleItems,
     totalHeight: items.length * itemHeight,
     offsetY: visibleRange.start * itemHeight,
-    onScroll: (e) => setScrollTop(e.target.scrollTop)
+    onScroll: (e) => setScrollTop(e.target.scrollTop),
   };
 };
 ```
@@ -936,48 +943,48 @@ export const useVirtualList = ({
 
 ```jsx
 // components/video/__tests__/VideoCard.test.jsx
-import { render, screen, fireEvent } from '@testing-library/react';
-import { vi } from 'vitest';
-import VideoCard from '../VideoCard';
+import { render, screen, fireEvent } from "@testing-library/react";
+import { vi } from "vitest";
+import VideoCard from "../VideoCard";
 
 const mockVideo = {
-  _id: '1',
-  title: 'Test Video',
-  thumbnail: 'https://example.com/thumb.jpg',
+  _id: "1",
+  title: "Test Video",
+  thumbnail: "https://example.com/thumb.jpg",
   duration: 300,
   views: 1500,
   owner: {
-    username: 'testuser',
-    fullName: 'Test User',
-    avatar: 'https://example.com/avatar.jpg'
+    username: "testuser",
+    fullName: "Test User",
+    avatar: "https://example.com/avatar.jpg",
   },
-  createdAt: '2024-01-01T00:00:00.000Z'
+  createdAt: "2024-01-01T00:00:00.000Z",
 };
 
-describe('VideoCard Component', () => {
-  test('renders video information correctly', () => {
+describe("VideoCard Component", () => {
+  test("renders video information correctly", () => {
     render(<VideoCard video={mockVideo} />);
-    
-    expect(screen.getByText('Test Video')).toBeInTheDocument();
-    expect(screen.getByText('Test User')).toBeInTheDocument();
+
+    expect(screen.getByText("Test Video")).toBeInTheDocument();
+    expect(screen.getByText("Test User")).toBeInTheDocument();
     expect(screen.getByText(/1.5K views/)).toBeInTheDocument();
-    expect(screen.getByText('5:00')).toBeInTheDocument();
+    expect(screen.getByText("5:00")).toBeInTheDocument();
   });
 
-  test('calls onClick when clicked', () => {
+  test("calls onClick when clicked", () => {
     const handleClick = vi.fn();
     render(<VideoCard video={mockVideo} onClick={handleClick} />);
-    
-    fireEvent.click(screen.getByRole('button'));
+
+    fireEvent.click(screen.getByRole("button"));
     expect(handleClick).toHaveBeenCalledWith(mockVideo);
   });
 
-  test('handles keyboard navigation', () => {
+  test("handles keyboard navigation", () => {
     const handleClick = vi.fn();
     render(<VideoCard video={mockVideo} onClick={handleClick} />);
-    
-    const card = screen.getByRole('button');
-    fireEvent.keyPress(card, { key: 'Enter' });
+
+    const card = screen.getByRole("button");
+    fireEvent.keyPress(card, { key: "Enter" });
     expect(handleClick).toHaveBeenCalledWith(mockVideo);
   });
 });
@@ -987,30 +994,31 @@ describe('VideoCard Component', () => {
 
 ```javascript
 // vitest.config.js
-import { defineConfig } from 'vitest/config';
-import react from '@vitejs/plugin-react';
-import { resolve } from 'path';
+import { defineConfig } from "vitest/config";
+import react from "@vitejs/plugin-react";
+import { resolve } from "path";
 
 export default defineConfig({
   plugins: [react()],
   test: {
-    environment: 'jsdom',
-    setupFiles: ['./src/test/setup.js'],
+    environment: "jsdom",
+    setupFiles: ["./src/test/setup.js"],
     globals: true,
   },
   resolve: {
     alias: {
-      '@': resolve(__dirname, 'src'),
-      '@components': resolve(__dirname, 'src/components'),
-      '@utils': resolve(__dirname, 'src/utils'),
-    }
-  }
+      "@": resolve(__dirname, "src"),
+      "@components": resolve(__dirname, "src/components"),
+      "@utils": resolve(__dirname, "src/utils"),
+    },
+  },
 });
 ```
 
 ## 🚧 Roadmap & Future Development
 
 ### Phase 1: Foundation Setup (Current)
+
 - [x] **Vite + React Setup** - Basic development environment
 - [x] **ESLint Configuration** - Code quality enforcement
 - [ ] **Router Integration** - React Router v6 implementation
@@ -1019,6 +1027,7 @@ export default defineConfig({
 - [ ] **Authentication UI** - Login and registration interfaces
 
 ### Phase 2: Core Features (Next 2-4 weeks)
+
 - [ ] **Video Player** - Custom video player with controls
 - [ ] **Video Gallery** - Home page video listing
 - [ ] **Search Interface** - Search functionality with filters
@@ -1027,6 +1036,7 @@ export default defineConfig({
 - [ ] **Responsive Design** - Mobile-first responsive layouts
 
 ### Phase 3: Social Features (4-6 weeks)
+
 - [ ] **Comment System** - Video comments and replies
 - [ ] **Like/Dislike System** - Engagement features
 - [ ] **Subscription System** - Channel following
@@ -1035,6 +1045,7 @@ export default defineConfig({
 - [ ] **Real-time Updates** - WebSocket integration
 
 ### Phase 4: Advanced Features (6-8 weeks)
+
 - [ ] **PWA Implementation** - Progressive Web App features
 - [ ] **Dark Mode** - Theme switching functionality
 - [ ] **Video Editing** - Basic in-browser editing tools
@@ -1043,6 +1054,7 @@ export default defineConfig({
 - [ ] **Social Sharing** - Share to external platforms
 
 ### Phase 5: Performance & Polish (8-10 weeks)
+
 - [ ] **Performance Optimization** - Bundle size and loading improvements
 - [ ] **Accessibility Enhancement** - WCAG compliance
 - [ ] **SEO Optimization** - Meta tags and structured data
@@ -1055,6 +1067,7 @@ export default defineConfig({
 ### Development Workflow
 
 1. **Setup Development Environment**
+
 ```bash
 git clone https://github.com/Chandi977/client.git
 cd client
@@ -1063,11 +1076,13 @@ npm run dev
 ```
 
 2. **Create Feature Branch**
+
 ```bash
 git checkout -b feature/video-player
 ```
 
 3. **Follow Code Standards**
+
 - Use functional components with hooks
 - Follow established file structure
 - Write tests for new components
@@ -1075,6 +1090,7 @@ git checkout -b feature/video-player
 - Update documentation as needed
 
 4. **Submit Pull Request**
+
 - Clear description of changes
 - Screenshots for UI changes
 - Link to related issues
@@ -1108,13 +1124,15 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 This React frontend application represents a modern approach to building video streaming interfaces. While the backend foundation was inspired by **[Hitesh Choudhary](https://www.youtube.com/@chaiaurcode)** (Chai aur Code), this frontend implementation focuses on:
 
 ### Frontend Development Principles
+
 - **Modern React Patterns** - Hooks, functional components, and best practices
 - **Performance Optimization** - Code splitting, lazy loading, and efficient rendering
-- **User Experience** - Responsive design, accessibility, and intuitive navigation  
+- **User Experience** - Responsive design, accessibility, and intuitive navigation
 - **Developer Experience** - Fast development with Vite, ESLint, and modern tooling
 - **Code Quality** - Consistent patterns, testing, and maintainable architecture
 
 ### Learning Resources
+
 - 📚 **[React Documentation](https://react.dev)** - Official React guides and API reference
 - ⚡ **[Vite Guide](https://vitejs.dev/guide/)** - Modern build tool documentation
 - 🎨 **[CSS-Tricks](https://css-tricks.com)** - Modern CSS techniques and best practices
@@ -1124,16 +1142,18 @@ This React frontend application represents a modern approach to building video s
 ## 📞 Contact & Support
 
 - **Developer:** [Chandi977](https://github.com/Chandi977)
-- **Frontend Repository:** [https://github.com/Chandi977/client](https://github.com/Chandi977/client)  
+- **Frontend Repository:** [https://github.com/Chandi977/client](https://github.com/Chandi977/client)
 - **Backend Repository:** [https://github.com/Chandi977/Youtube-Backend](https://github.com/Chandi977/Youtube-Backend)
 
 ### Getting Help
+
 - 🐛 **Bug Reports:** Create detailed issues with reproduction steps
 - 💡 **Feature Requests:** Submit enhancement ideas via GitHub issues
 - 📧 **Direct Support:** your-email@example.com
 - 💬 **Community:** Use GitHub Discussions for questions and ideas
 
 ### Project Status
+
 🔄 **Status:** Active Development  
 📅 **Last Updated:** December 2024  
 🎯 **Current Focus:** Core component development and API integration
