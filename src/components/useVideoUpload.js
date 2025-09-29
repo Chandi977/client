@@ -41,8 +41,12 @@ export const useVideoUpload = (userId) => {
   useEffect(() => {
     if (!userId) return;
 
-    const socket = io(API_BASE_URL, {
+    const socket = io("localhost:8000", {
       withCredentials: true,
+      // The backend socket.io server is listening on the root path, not /api/v1
+      // We need to override the default path which would be /api/v1/socket.io/
+      // See: https://socket.io/docs/v4/client-options/#path
+      path: "/socket.io/",
     });
     socketRef.current = socket;
 

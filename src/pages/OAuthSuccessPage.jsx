@@ -9,40 +9,50 @@ const OAuthSuccessPage = () => {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const token = params.get("token"); // token from backend
-    const userData = params.get("user"); // optional user info from backend
+    const accessToken = params.get("accessToken");
+    const refreshToken = params.get("refreshToken");
+    const userData = params.get("user"); // optional user info
 
-    if (token) {
+    if (accessToken) {
       try {
         const user = userData ? JSON.parse(decodeURIComponent(userData)) : null;
 
         if (user) {
-          handleLoginSuccess(user); // Update context with user info
+          handleLoginSuccess(user, accessToken); // Update context with user info
         }
 
-        // Set token in cookie (expires in 7 days)
-        Cookies.set("authToken", token, { expires: 7 });
+        // Store tokens in cookies
+        Cookies.set("accessToken", accessToken, { expires: 1 }); // 1 day
+        if (refreshToken) {
+          Cookies.set("refreshToken", refreshToken, { expires: 7 }); // 7 days
+        }
 
-        // Use postMessage to communicate with the opener window, which is more reliable
-        // than reloading and allows for a cleaner UX.
+        // Send postMessage to opener (popup)
         if (window.opener) {
           window.opener.postMessage(
-            { oauthSuccess: true },
+            {
+              oauthSuccess: true,
+              loginResponse: {
+                statusCode: 200,
+                data: { user, accessToken, refreshToken },
+                message: "OAuth login successful",
+                success: true,
+              },
+            },
             window.location.origin
           );
           window.close();
         } else {
-          navigate("/"); // Fallback redirect if there's no opener
+          navigate("/"); // fallback if no opener
         }
       } catch (err) {
         console.error("Failed to process OAuth success:", err);
-        navigate("/login"); // Redirect to login on error
+        navigate("/login");
       }
     } else {
-      // If no token is found, redirect to login
       navigate("/login");
     }
-  }, []);
+  }, [handleLoginSuccess, navigate]);
 
   return (
     <div className="p-6 text-center">

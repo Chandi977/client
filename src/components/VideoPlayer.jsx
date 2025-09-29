@@ -35,10 +35,11 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
 
   const [qualities, setQualities] = useState([]);
   const [currentQuality, setCurrentQuality] = useState(-1); // -1 for auto
-  const [playingQuality, setPlayingQuality] = useState(-1); // The actual playing level index
+  const [playingQuality, setPlayingQuality] = useState(-1);
   const [shouldLoad, setShouldLoad] = useState(false);
   const [isSwitchingQuality, setIsSwitchingQuality] = useState(false);
 
+  // Lazy load observer
   const onIntersection = useCallback((entries) => {
     const [entry] = entries;
     if (entry.isIntersecting) setShouldLoad(true);
@@ -59,7 +60,6 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !shouldLoad || !src) return;
-    // console.log("VideoPlayer: src prop received", src);
 
     let blobUrl = null;
 
@@ -70,35 +70,25 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
         hls.loadSource(sourceUrl);
         hls.attachMedia(video);
 
-        hls.on(Hls.Events.ERROR, function (event, data) {
+        hls.on(Hls.Events.ERROR, (_, data) => {
           console.error("HLS.js Error:", data);
-          // You could add logic here to try and recover from the error
         });
 
         hls.on(Hls.Events.MANIFEST_PARSED, (_, data) => {
-          const allLevels = data.levels.map((level, index) => {
-            return {
-              index,
-              height: level.height || 0,
-              name: level.name || `${Math.round(level.bitrate / 1000)} kbps`,
-            };
-          });
-
-          // console.log(
-          //   "HLS.js: Manifest parsed, qualities available:",
-          //   allLevels
-          // );
+          const allLevels = data.levels.map((level, index) => ({
+            index,
+            height: level.height || 0,
+            name: level.name || `${Math.round(level.bitrate / 1000)} kbps`,
+          }));
           setQualities(allLevels);
-          setCurrentQuality(-1); // Auto
+          setCurrentQuality(-1);
           setPlayingQuality(hls.currentLevel);
         });
 
+        hls.on(Hls.Events.LEVEL_SWITCHING, () => setIsSwitchingQuality(true));
         hls.on(Hls.Events.LEVEL_SWITCHED, (_, data) => {
           setPlayingQuality(data.level);
           setIsSwitchingQuality(false);
-        });
-        hls.on(Hls.Events.LEVEL_SWITCHING, () => {
-          setIsSwitchingQuality(true);
         });
       } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
         video.src = sourceUrl;
@@ -106,19 +96,16 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
     };
 
     if (typeof src === "object" && src.masterPlaylist) {
-      // Check for non-empty masterPlaylist
-      const blob = new Blob([src.masterPlaylist || ""], {
-        // Ensure content is a string, even if masterPlaylist is null/undefined
+      const blob = new Blob([src.masterPlaylist], {
         type: "application/vnd.apple.mpegurl",
       });
       blobUrl = URL.createObjectURL(blob);
-      // console.log("VideoPlayer: Created blob URL:", blobUrl);
       setupHls(blobUrl);
     } else if (typeof src === "string") {
       if (src.endsWith(".m3u8")) setupHls(src);
-      else video.src = src || ""; // Ensure src is an empty string if it's falsy
+      else video.src = src || "";
     } else {
-      video.src = ""; // Already handles falsy src
+      video.src = "";
     }
 
     const handlePlay = () => setIsPlaying(true);
@@ -174,31 +161,44 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  // Controls
   const togglePlayPause = () => {
-    if (videoRef.current.paused) videoRef.current.play();
-    else videoRef.current.pause();
+    const video = videoRef.current;
+    if (video.paused) video.play();
+    else video.pause();
   };
 
   const toggleMute = () => {
-    videoRef.current.muted = !videoRef.current.muted;
-    setIsMuted(videoRef.current.muted);
+    const video = videoRef.current;
+    video.muted = !video.muted;
+    setIsMuted(video.muted);
   };
 
   const handleVolumeChange = (e) => {
+    const video = videoRef.current;
     const newVolume = parseFloat(e.target.value);
-    videoRef.current.volume = newVolume;
+    video.volume = newVolume;
     setVolume(newVolume);
     if (newVolume > 0) setIsMuted(false);
   };
 
   const handleSpeedChange = (rate) => {
-    videoRef.current.playbackRate = rate;
+    const video = videoRef.current;
+    video.playbackRate = rate;
     setPlaybackRate(rate);
     setSettingsMenu("main");
   };
 
   const handleQualityChange = (levelIndex) => {
-    if (hlsRef.current) hlsRef.current.nextLevel = levelIndex;
+    if (!hlsRef.current) return;
+
+    if (levelIndex === -1) {
+      // Auto
+      hlsRef.current.currentLevel = -1;
+    } else {
+      hlsRef.current.currentLevel = levelIndex; // Immediate switch to chosen quality
+    }
+
     setCurrentQuality(levelIndex);
     setSettingsMenu("main");
   };
@@ -222,9 +222,8 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
   const currentQualityLabel = useMemo(() => {
     if (currentQuality === -1) {
       const level = qualities.find((q) => q.index === playingQuality);
-      if (level) {
+      if (level)
         return `Auto (${level.height > 0 ? `${level.height}p` : level.name})`;
-      }
       return "Auto";
     }
     const level = qualities.find((q) => q.index === currentQuality);
@@ -235,10 +234,10 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
       : "Auto";
   }, [currentQuality, playingQuality, qualities]);
 
-  const sortedQualities = useMemo(() => {
-    return [...qualities].sort((a, b) => b.height - a.height);
-  }, [qualities]);
-  // console.log("Video adaptive streams:", video.videoFile.adaptive);
+  const sortedQualities = useMemo(
+    () => [...qualities].sort((a, b) => b.height - a.height),
+    [qualities]
+  );
 
   return (
     <div
@@ -262,12 +261,15 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
         playsInline
         preload="metadata"
       />
+
+      {/* Loading Spinner */}
       {isSwitchingQuality && (
         <div className="absolute inset-0 bg-black/50 flex justify-center items-center z-10">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
         </div>
       )}
 
+      {/* Controls Overlay */}
       <div
         className={`absolute inset-0 bg-black/20 transition-opacity duration-300 ${
           showControls || !isPlaying ? "opacity-100" : "opacity-0"
@@ -296,6 +298,7 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
               <button onClick={onNext} className="text-white">
                 <SkipForward size={20} />
               </button>
+
               <div className="flex items-center gap-1 md:gap-2">
                 <button onClick={toggleMute}>
                   {isMuted || volume === 0 ? <VolumeX /> : <Volume2 />}
@@ -306,10 +309,11 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
                   max="1"
                   step="0.1"
                   value={volume}
-                  onChange={handleVolumeChange} // Use accent-blue-500 to match the timeline
+                  onChange={handleVolumeChange}
                   className="w-12 md:w-20 h-1 accent-blue-500"
                 />
               </div>
+
               <span className="text-sm">
                 {formatTime(currentTime)} / {formatTime(duration)}
               </span>
@@ -326,8 +330,10 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
                 >
                   <Settings size={20} />
                 </button>
+
                 {showSettings && (
                   <div className="absolute bottom-full right-0 mb-2 bg-black/80 backdrop-blur-sm rounded-md p-2 w-56 max-h-60 overflow-y-auto">
+                    {/* Main Settings */}
                     {settingsMenu === "main" && (
                       <div>
                         {qualities.length > 0 && (
@@ -353,6 +359,8 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
                         </button>
                       </div>
                     )}
+
+                    {/* Quality Menu */}
                     {settingsMenu === "quality" && (
                       <div>
                         <div className="flex items-center">
@@ -376,32 +384,30 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
                           <span>Auto</span>
                           {currentQuality === -1 && <Check size={16} />}
                         </button>
-                        {sortedQualities.map(
-                          (
-                            level // Use flex-1 on the span to push the checkmark
-                          ) => (
-                            <button
-                              key={level.index}
-                              onClick={() => handleQualityChange(level.index)}
-                              className={`w-full text-left text-sm p-2 rounded hover:bg-gray-700 flex justify-between items-center ${
-                                currentQuality === level.index
-                                  ? "text-blue-400"
-                                  : ""
-                              }`}
-                            >
-                              <span className="flex-1 text-left">
-                                {level.height > 0
-                                  ? `${level.height}p`
-                                  : level.name}
-                              </span>
-                              {currentQuality === level.index && (
-                                <Check size={16} />
-                              )}
-                            </button>
-                          )
-                        )}
+                        {sortedQualities.map((level) => (
+                          <button
+                            key={level.index}
+                            onClick={() => handleQualityChange(level.index)}
+                            className={`w-full text-left text-sm p-2 rounded hover:bg-gray-700 flex justify-between items-center ${
+                              currentQuality === level.index
+                                ? "text-blue-400"
+                                : ""
+                            }`}
+                          >
+                            <span className="flex-1 text-left">
+                              {level.height > 0
+                                ? `${level.height}p`
+                                : level.name}
+                            </span>
+                            {currentQuality === level.index && (
+                              <Check size={16} />
+                            )}
+                          </button>
+                        ))}
                       </div>
                     )}
+
+                    {/* Speed Menu */}
                     {settingsMenu === "speed" && (
                       <div>
                         <div className="flex items-center">
@@ -412,7 +418,7 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
                             <ChevronLeft size={18} />
                           </button>
                           <h4 className="text-sm font-semibold ml-2">
-                            Playback speed
+                            Playback Speed
                           </h4>
                         </div>
                         <div className="border-t border-gray-600 my-1"></div>
@@ -425,7 +431,7 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
                                 playbackRate === rate ? "text-blue-400" : ""
                               }`}
                             >
-                              <span>{rate === 1 ? "Normal" : `${rate}x`}</span>
+                              <span>{rate}x</span>
                               {playbackRate === rate && <Check size={16} />}
                             </button>
                           )
@@ -435,8 +441,9 @@ const VideoPlayer = ({ src, poster, onNext, onPrevious, onPlay }) => {
                   </div>
                 )}
               </div>
+
               <button onClick={toggleFullScreen}>
-                {isFullScreen ? <Minimize size={20} /> : <Maximize size={20} />}
+                {isFullScreen ? <Minimize /> : <Maximize />}
               </button>
             </div>
           </div>

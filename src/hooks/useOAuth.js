@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../components/UserContext";
 import Cookies from "js-cookie";
-import toast from "react-hot-toast";
+// import toast from "react-hot-toast";
 
 const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
