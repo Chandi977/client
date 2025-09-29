@@ -9,6 +9,21 @@ A modern, responsive React frontend application for the VideoTube YouTube clone 
 ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)
 
 
+Screenshots
+
+<img width="1920" height="1080" alt="Screenshot 2025-09-29 205032" src="https://github.com/user-attachments/assets/bcb89e51-688a-4f87-91ab-26630d95d6c1" />
+<img width="1920" height="1080" alt="Screenshot 2025-09-29 204939" src="https://github.com/user-attachments/assets/1341026b-ed3e-4d00-bc5a-be7bf7fe4309" />
+<img width="1920" height="1080" alt="Screenshot 2025-09-29 204918" src="https://github.com/user-attachments/assets/e7a77227-a1b1-444a-8a93-00b4b3f103fe" />
+<img width="1920" height="1080" alt="Screenshot 2025-09-29 204835" src="https://github.com/user-attachments/assets/59d62d3a-70ac-41e5-998c-47a9a89e00eb" />
+<img width="1920" height="1080" alt="Screenshot 2025-09-29 204709" src="https://github.com/user-attachments/assets/54c9b927-8b1f-4f7f-9e5c-dd885ace8e38" />
+<img width="1920" height="1080" alt="Screenshot 2025-09-29 204654" src="https://github.com/user-attachments/assets/59e9c6c1-0fb4-4b59-88a8-d13d78c6f318" />
+<img width="1920" height="1080" alt="Screenshot 2025-09-29 205750" src="https://github.com/user-attachments/assets/1027e38d-d771-47f7-a5f6-1a06fbe4d9da" />
+<img width="1920" height="1080" alt="Screenshot 2025-09-29 205224" src="https://github.com/user-attachments/assets/3aef1a6a-25a0-48ee-84a4-3077a249a38a" />
+<img width="1920" height="1080" alt="Screenshot 2025-09-29 205102" src="https://github.com/user-attachments/assets/90773e2d-0a9c-41f8-b1c6-892af735ca38" />
+<img width="1920" height="1080" alt="Screenshot 2025-09-29 205052" src="https://github.com/user-attachments/assets/1fa06161-fb37-4e21-b33e-a6959b37b1ca" />
+
+
+
 ### User Interface & Experience
 - 🎨 **Modern Design System** - Clean, contemporary UI with responsive layouts
 - 📱 **Mobile-First Responsive** - Seamless experience across all devices and screen sizes
